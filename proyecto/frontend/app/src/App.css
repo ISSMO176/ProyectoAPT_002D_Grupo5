@@ -1,0 +1,104 @@
+/* Estilos generales */
+body {
+    background-color: #f8f9fa; /* Fondo claro */
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Estilos del header */
+  .header {
+    background-color: #b80000; /* Fondo rojo para el header */
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .header img {
+    height: 40px;
+  }
+  
+  .header button {
+    background-color: black; /* Botón de perfil con fondo negro */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+  }
+  
+  .header button:hover {
+    background-color: #333; /* Cambio de color en hover para el botón Perfil */
+  }
+  
+  /* Estilos para las encuestas */
+  .encuestas-container {
+    padding: 20px;
+    margin: 0 auto;
+    max-width: 800px; /* Limitar el ancho para centrar */
+  }
+  
+  .encuesta-card {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #b80000; /* Línea roja a la izquierda */
+  }
+  
+  .encuesta-titulo {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .encuesta-area {
+    font-size: 14px;
+    color: #777; /* Color gris claro para los detalles del área */
+  }
+  
+  /* Botones */
+  .btn-habilitar {
+    background-color: #b80000; /* Color rojo del botón Habilitar/Deshabilitar */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-left: 10px;
+  }
+  
+  .btn-habilitar:hover {
+    background-color: #a00000; /* Oscurecer el rojo al pasar el ratón */
+  }
+  
+  .btn-modificar {
+    background-color: #f0ad4e; /* Color anaranjado del botón Modificar */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-left: 10px;
+  }
+  
+  .btn-modificar:hover {
+    background-color: #ec971f; /* Oscurecer el naranja al pasar el ratón */
+  }
+  
+  /* Botón de crear */
+  .btn-crear {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .btn-crear:hover {
+    background-color: darkgreen; /* Oscurecer el verde en hover */
+  }
+  
+  
