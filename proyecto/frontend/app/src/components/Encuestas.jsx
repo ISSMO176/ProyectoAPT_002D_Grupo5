@@ -1,9 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const Encuestas = () => {
+  const [encuestas, setEncuestas] = useState([]);
+
+  // Función para obtener las encuestas
+  const fetchEncuestas = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/encuestas');
+      setEncuestas(response.data); 
+    } catch (error) {
+      console.error('Error al obtener las encuestas:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEncuestas();
+  }, []);
+
   return (
     <div>
-      {}
       <div className="header">
         <img src="/logo.png" alt="Logo" />
         <div>
@@ -12,44 +28,21 @@ const Encuestas = () => {
         </div>
       </div>
 
-      {}
       <div className="encuestas-container">
-        {}
         <button className="btn btn-success mb-3">Crear</button>
-
-        {}
-        <div className="encuesta-card">
-          <div>
-            <div className="encuesta-titulo">Satisfacción Laboral</div>
-            <div className="encuesta-area">Área: Mantención</div>
+        
+        {encuestas.map((encuesta) => (
+          <div className="encuesta-card" key={encuesta.id_encuesta}>
+            <div>
+              <div className="encuesta-titulo">{encuesta.titulo}</div>
+              <div className="encuesta-area">Área: {/* Aquí podrías añadir el área correspondiente */}</div>
+            </div>
+            <div>
+              <button className="btn btn-warning me-2">Modificar</button>
+              <button className="btn btn-danger">Deshabilitar</button>
+            </div>
           </div>
-          <div>
-            <button className="btn btn-warning me-2">Modificar</button>
-            <button className="btn btn-danger">Deshabilitar</button>
-          </div>
-        </div>
-
-        <div className="encuesta-card">
-          <div>
-            <div className="encuesta-titulo">Acoso en el área de trabajo</div>
-            <div className="encuesta-area">Especialidad: Electricista</div>
-          </div>
-          <div>
-            <button className="btn btn-warning me-2">Modificar</button>
-            <button className="btn btn-danger">Deshabilitar</button>
-          </div>
-        </div>
-
-        <div className="encuesta-card disabled">
-          <div>
-            <div className="encuesta-titulo">Satisfacción Salarial</div>
-            <div className="encuesta-area">Especialidad: Montaje</div>
-          </div>
-          <div>
-            <button className="btn btn-warning me-2">Modificar</button>
-            <button className="btn btn-secondary">Habilitar</button>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
