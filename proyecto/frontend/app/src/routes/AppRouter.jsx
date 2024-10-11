@@ -11,6 +11,7 @@ import MisEncuestas from '../components/MisEncuestas';
 import Encuestasignada from '../components/Encuestasignada';
 import AsignarEncuestas from '../components/AsignarEncuestas';
 import AgregarPreguntas from '../components/AgregarPreguntas';
+import CrearEncuesta from '../components/CrearEncuesta';
 
 const AppRouter = () => {
   return (
@@ -26,6 +27,7 @@ const AppRouter = () => {
       <Route path="/encuestasignada" element={<Encuestasignada />} />
       <Route path="/asignarencuestas" element={<AsignarEncuestas />} />
       <Route path="/agregarpreguntas" element={<AgregarPreguntas />} />
+      <Route path="/crear-encuesta" element={<CrearEncuesta />} />
     </Routes>
   );
 };

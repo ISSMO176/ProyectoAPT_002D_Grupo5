@@ -106,7 +106,7 @@ model Rol {
 model Encuesta {
   id_encuesta        Int                @id @default(autoincrement())
   titulo             String
-  fecha_creacion     DateTime
+  fecha_creacion     DateTime 
   estado_encuesta    String
   preguntas          Pregunta[]
   encuestasAsignadas EncuestaAsignada[]

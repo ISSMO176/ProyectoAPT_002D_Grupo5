@@ -1,17 +1,10 @@
-// src/routes/encuestaRoutes.js
-import express from 'express';
-import {
-  obtenerEncuestas,
-  crearEncuesta,
-  modificarEncuesta,
-  deshabilitarEncuesta
-} from '../controllers/encuestaController.js';
+import { Router } from 'express';
+import { crearEncuesta, obtenerEncuestas } from '../controllers/encuestaController.js';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/encuestas', obtenerEncuestas);
+// Rutas
+router.get('/encuestas', obtenerEncuestas); // Esta línea debe estar presente
 router.post('/encuestas', crearEncuesta);
-router.put('/encuestas/:id', modificarEncuesta);
-router.patch('/encuestas/:id/deshabilitar', deshabilitarEncuesta);
 
 export default router;
