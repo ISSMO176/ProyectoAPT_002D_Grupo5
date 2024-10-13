@@ -6,6 +6,8 @@
     "react-bootstrap": "^2.10.5",
     "react-router-dom": "^6.26.2"
   },
-  "proxy": "http://localhost:5000/"
+  "proxy": "http://localhost:5000/",
+  "devDependencies": {
+    "vite": "^5.4.8"
+  }
 }
-

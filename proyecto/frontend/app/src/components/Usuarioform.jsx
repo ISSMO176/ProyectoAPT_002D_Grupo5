@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 const UsuarioForm = ({ usuarioEditado, onSave, onCancel, roles, areas }) => {
   const [rut, setRut] = useState('');
+  const [isValidRut, setIsValidRut] = useState(null);
   const [nombre, setNombre] = useState('');
   const [apellido_paterno, setApellidoPaterno] = useState('');
   const [apellido_materno, setApellidoMaterno] = useState('');
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
-  const [rolId, setRolId] = useState(1); // Cambia el valor predeterminado según tus roles
-  const [areaId_area, setAreaIdArea] = useState(null); // Cambia el valor predeterminado según tus áreas
+  const [rolId, setRolId] = useState(1);
+  const [areaId_area, setAreaIdArea] = useState(null);
+
+  const rutRegex = /^[0-9]{7,8}-[0-9Kk]$/;
 
   useEffect(() => {
     if (usuarioEditado) {
@@ -23,8 +26,22 @@ const UsuarioForm = ({ usuarioEditado, onSave, onCancel, roles, areas }) => {
     }
   }, [usuarioEditado]);
 
+  const validarRUT = (rut) => {
+    return rutRegex.test(rut);
+  };
+
+  const handleRutChange = (e) => {
+    const newRut = e.target.value;
+    setRut(newRut);
+    setIsValidRut(validarRUT(newRut));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isValidRut) {
+      alert("Por favor ingrese un RUT válido");
+      return;
+    }
     const usuario = { rut, nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area };
     onSave(usuario);
   };
@@ -34,7 +51,18 @@ const UsuarioForm = ({ usuarioEditado, onSave, onCancel, roles, areas }) => {
       <h3>{usuarioEditado ? 'Modificar Usuario' : 'Crear Usuario'}</h3>
       <div className="mb-3">
         <label className="form-label">RUT</label>
-        <input type="text" className="form-control" value={rut} onChange={(e) => setRut(e.target.value)} required />
+        <input
+          type="text"
+          className="form-control"
+          value={rut}
+          onChange={handleRutChange}
+          required
+        />
+        {isValidRut === null ? null : isValidRut ? (
+          <p style={{ color: 'green' }}>RUT válido</p>
+        ) : (
+          <p style={{ color: 'red' }}>RUT inválido</p>
+        )}
       </div>
       <div className="mb-3">
         <label className="form-label">Nombre</label>
@@ -84,3 +112,4 @@ const UsuarioForm = ({ usuarioEditado, onSave, onCancel, roles, areas }) => {
 };
 
 export default UsuarioForm;
+
