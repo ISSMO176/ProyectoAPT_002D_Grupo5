@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors'; // Importar cors
 import encuestaRoutes from './routes/encuestaRoutes.js';
+import usuarioRoutes from './routes/usuarioRoutes.js'; // Importar las rutas de usuario
 
 const app = express();
 
@@ -15,6 +16,9 @@ app.use(express.json());
 
 // Rutas para encuestas
 app.use('/api', encuestaRoutes);
+
+// Rutas para usuarios
+app.use('/api', usuarioRoutes); // Añade las rutas de usuario aquí
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

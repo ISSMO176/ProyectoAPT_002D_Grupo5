@@ -29,26 +29,27 @@ export const crearEncuesta = async (req, res) => {
       data: { 
         titulo, 
         estado_encuesta, 
-        fecha_creacion: fechaValida // Usa la fecha validada
+        fecha_creacion: fechaValida 
       },
     });
     res.status(201).json(nuevaEncuesta);
   } catch (error) {
-    console.error('Error al crear la encuesta:', error); // Imprimir error en consola
+    console.error('Error al crear la encuesta:', error); 
     res.status(500).json({ error: 'Error al crear la encuesta', details: error.message, stack: error.stack });
   }
 };
 
-// Modificar una encuesta existente
-export const modificarEncuesta = async (req, res) => {
-  const { id } = req.params;
-  const { titulo, estado_encuesta } = req.body;
+// Actualizar una encuesta existente
+export const actualizarEncuesta = async (req, res) => {
+  const { id } = req.params; 
+  const { titulo, estado_encuesta } = req.body; 
+
   try {
     const encuestaActualizada = await prisma.encuesta.update({
-      where: { id_encuesta: Number(id) },
-      data: { titulo, estado_encuesta },
+      where: { id_encuesta: parseInt(id) }, 
+      data: { titulo, estado_encuesta }, 
     });
-    res.status(200).json(encuestaActualizada);
+    res.json(encuestaActualizada); 
   } catch (error) {
     res.status(500).json({ error: 'Error al actualizar la encuesta' });
   }
@@ -58,12 +59,18 @@ export const modificarEncuesta = async (req, res) => {
 export const deshabilitarEncuesta = async (req, res) => {
   const { id } = req.params;
   try {
-    const encuestaDeshabilitada = await prisma.encuesta.update({
+    const encuesta = await prisma.encuesta.findUnique({
       where: { id_encuesta: Number(id) },
-      data: { estado_encuesta: 'Deshabilitada' },
     });
-    res.status(200).json(encuestaDeshabilitada);
+
+    const nuevoEstado = encuesta.estado_encuesta === 'Activa' ? 'Deshabilitada' : 'Activa';
+
+    const encuestaActualizada = await prisma.encuesta.update({
+      where: { id_encuesta: Number(id) },
+      data: { estado_encuesta: nuevoEstado },
+    });
+    res.status(200).json(encuestaActualizada);
   } catch (error) {
-    res.status(500).json({ error: 'Error al deshabilitar la encuesta' });
+    res.status(500).json({ error: 'Error al cambiar el estado de la encuesta' });
   }
 };
