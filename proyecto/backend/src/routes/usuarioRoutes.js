@@ -1,12 +1,24 @@
-import { Router } from 'express';
-import { crearUsuario, obtenerUsuarios, actualizarUsuario, eliminarUsuario } from '../controllers/usuarioController.js';
+// src/routes/usuarioRoutes.js
+import express from 'express';
+import {
+  obtenerUsuarios,
+  crearUsuario,
+  modificarUsuario,
+  eliminarUsuario,
+} from '../controllers/usuarioController.js';
 
-const router = Router();
+const router = express.Router();
 
-// Rutas para el CRUD de usuarios
-router.get('/usuarios', obtenerUsuarios); // Obtener todos los usuarios
-router.post('/usuarios', crearUsuario); // Crear un nuevo usuario
-router.put('/usuarios/:id', actualizarUsuario); // Actualizar un usuario existente
-router.delete('/usuarios/:id', eliminarUsuario); // Eliminar un usuario
+// Obtener todos los usuarios
+router.get('/', obtenerUsuarios);
+
+// Crear un nuevo usuario
+router.post('/', crearUsuario);
+
+// Modificar un usuario existente
+router.put('/:rut', modificarUsuario);
+
+// Eliminar un usuario
+router.delete('/:rut', eliminarUsuario);
 
 export default router;

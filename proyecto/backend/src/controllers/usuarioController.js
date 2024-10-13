@@ -1,8 +1,32 @@
-import prisma from '../prismaClient.js'; // Asegúrate de que la ruta sea correcta
+// src/controllers/usuariosController.js
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
-// Crear un nuevo usuario
+// Obtener todos los usuarios
+export const obtenerUsuarios = async (req, res) => {
+  try {
+    const usuarios = await prisma.usuario.findMany({
+      include: {
+        rol: true, // Incluir el rol si lo deseas
+        Area: true, // Incluir área si lo deseas
+      },
+    });
+    res.status(200).json(usuarios);
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios', details: error.message });
+  }
+};
+
+// Crear nuevo usuario
 export const crearUsuario = async (req, res) => {
-  const { rut, nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId } = req.body;
+  const { rut, nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
+  
+  // Validar que todos los campos estén presentes
+  if (!rut || !nombre || !apellido_paterno || !apellido_materno || !correo || !contrasena || !rolId || !areaId_area) {
+    return res.status(400).json({ error: 'Faltan datos requeridos' });
+  }
+
   try {
     const nuevoUsuario = await prisma.usuario.create({
       data: {
@@ -11,56 +35,59 @@ export const crearUsuario = async (req, res) => {
         apellido_paterno,
         apellido_materno,
         correo,
-        contrasena, // Considera encriptar la contraseña
+        contrasena,
         rolId,
+        areaId_area,
       },
     });
     res.status(201).json(nuevoUsuario);
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear el usuario' });
+    console.error('Error al crear el usuario:', error);
+    res.status(500).json({ error: 'Error al crear el usuario', details: error.message });
   }
 };
 
-// Obtener todos los usuarios
-export const obtenerUsuarios = async (req, res) => {
-  try {
-    const usuarios = await prisma.usuario.findMany();
-    res.status(200).json(usuarios);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los usuarios' });
+// Modificar usuario
+export const modificarUsuario = async (req, res) => {
+  const { rut } = req.params;
+  const { nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
+  
+  // Validar que todos los campos estén presentes
+  if (!nombre || !apellido_paterno || !apellido_materno || !correo || !contrasena || !rolId || !areaId_area) {
+    return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
-};
 
-// Actualizar un usuario
-export const actualizarUsuario = async (req, res) => {
-  const { id } = req.params;
-  const { nombre, apellido_paterno, apellido_materno, correo, rolId } = req.body;
   try {
-    const usuarioActualizado = await prisma.usuario.update({
-      where: { rut: id }, // Asegúrate de que estás usando el identificador correcto
+    const usuarioModificado = await prisma.usuario.update({
+      where: { rut },
       data: {
         nombre,
         apellido_paterno,
         apellido_materno,
         correo,
+        contrasena,
         rolId,
+        areaId_area,
       },
     });
-    res.status(200).json(usuarioActualizado);
+    res.status(200).json(usuarioModificado);
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el usuario' });
+    console.error('Error al modificar el usuario:', error);
+    res.status(500).json({ error: 'Error al modificar el usuario', details: error.message });
   }
 };
 
-// Eliminar un usuario
+// Eliminar usuario
 export const eliminarUsuario = async (req, res) => {
-  const { id } = req.params;
+  const { rut } = req.params;
+  
   try {
     await prisma.usuario.delete({
-      where: { rut: id }, // Asegúrate de que estás usando el identificador correcto
+      where: { rut },
     });
-    res.status(204).send(); // Respuesta sin contenido
+    res.status(200).json({ message: 'Usuario eliminado' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar el usuario' });
+    console.error('Error al eliminar el usuario:', error);
+    res.status(500).json({ error: 'Error al eliminar el usuario', details: error.message });
   }
 };

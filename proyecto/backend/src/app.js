@@ -1,26 +1,31 @@
 import express from 'express';
-import cors from 'cors'; // Importar cors
+import cors from 'cors';
 import encuestaRoutes from './routes/encuestaRoutes.js';
-import usuarioRoutes from './routes/usuarioRoutes.js'; // Importar las rutas de usuario
-
+import usuarioRoutes from './routes/usuarioRoutes.js'; // Asegúrate de tener estas rutas
+import rolRoutes from './routes/rolRoutes.js';
+import areaRoutes from './routes/areaRoutes.js';
 const app = express();
 
 // Configurar CORS
 app.use(cors({
   origin: 'http://localhost:5173', // Cambia esto si tu frontend está en otro dominio o puerto
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json());
 
 // Rutas para encuestas
-app.use('/api', encuestaRoutes);
-
+app.use('/api/encuestas', encuestaRoutes); // Prefijo específico para encuestas
 // Rutas para usuarios
-app.use('/api', usuarioRoutes); // Añade las rutas de usuario aquí
+app.use('/api/usuarios', usuarioRoutes); // Prefijo específico para usuarios
+// Rutas para roles
+app.use('/api/roles', rolRoutes);
 
-const PORT = process.env.PORT || 3001;
+app.use('/api/areas', areaRoutes);
+
+
+const PORT = process.env.PORT || 4000; // Cambia esto a 4000
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

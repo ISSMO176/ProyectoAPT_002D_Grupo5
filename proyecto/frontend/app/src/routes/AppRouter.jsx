@@ -13,6 +13,9 @@ import AsignarEncuestas from '../components/AsignarEncuestas';
 import AgregarPreguntas from '../components/AgregarPreguntas';
 import CrearEncuesta from '../components/CrearEncuesta';
 import ModificarEncuesta from '../components/ModificarEncuesta';
+import Roles from '../components/Roles'; // Importar el componente Roles
+
+import Areas from '../components/Areas'; // Importar el componente Areas
 
 const AppRouter = () => {
   return (
@@ -30,7 +33,8 @@ const AppRouter = () => {
       <Route path="/agregarpreguntas" element={<AgregarPreguntas />} />
       <Route path="/crear-encuesta" element={<CrearEncuesta />} />
       <Route path="/modificar-encuesta/:idEncuesta" element={<ModificarEncuesta />} />
-      
+      <Route path="/roles" element={<Roles />} /> {/* Ruta para el listado de roles */}
+      <Route path="/areas" element={<Areas />} /> {/* Corregido: usar 'element' en lugar de 'component' */}
     </Routes>
   );
 };
