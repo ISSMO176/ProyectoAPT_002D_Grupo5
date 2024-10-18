@@ -1,9 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import encuestaRoutes from './routes/encuestaRoutes.js';
-import usuarioRoutes from './routes/usuarioRoutes.js'; // Asegúrate de tener estas rutas
+import usuarioRoutes from './routes/usuarioRoutes.js'; // Rutas para usuarios
 import rolRoutes from './routes/rolRoutes.js';
 import areaRoutes from './routes/areaRoutes.js';
+
 const app = express();
 
 // Configurar CORS
@@ -13,19 +14,23 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
+// Middleware para parsear JSON
 app.use(express.json());
 
 // Rutas para encuestas
 app.use('/api/encuestas', encuestaRoutes); // Prefijo específico para encuestas
-// Rutas para usuarios
+
+// Rutas para usuarios (incluye la ruta /login)
 app.use('/api/usuarios', usuarioRoutes); // Prefijo específico para usuarios
+
 // Rutas para roles
 app.use('/api/roles', rolRoutes);
 
+// Rutas para áreas
 app.use('/api/areas', areaRoutes);
 
-
-const PORT = process.env.PORT || 4000; // Cambia esto a 4000
+// Puerto donde se escucha
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

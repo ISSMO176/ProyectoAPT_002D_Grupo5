@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase/firebaseConfig';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -10,20 +8,37 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Logging in with', { email, password });
-
+  
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      if (email.endsWith('@salfamantenciones.cl')) {
-        navigate('/encuestas');
+      const response = await fetch('http://localhost:4000/api/usuarios/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          correo: email,        // El correo que el usuario ingresa
+          contrasena: password,  // La contraseña que el usuario ingresa
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Si la respuesta es exitosa, redirigir según el correo
+        if (email.endsWith('@salfamantenciones.cl')) {
+          navigate('/encuestas');
+        } else {
+          navigate('/misencuestas');
+        }
       } else {
-        navigate('/misencuestas');
+        alert(data.error || 'Credenciales inválidas');
       }
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
-      alert('Credenciales inválidas. Intente de nuevo.');
+      alert('Error al iniciar sesión');
     }
   };
+  
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100">
