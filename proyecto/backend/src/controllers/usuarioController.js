@@ -1,7 +1,51 @@
 import { db, admin } from '../controllers/firebase.js';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import enviarCorreoDeInvitacion from '../controllers/enviarCorreoDeInvitacion.js';
+import { randomBytes } from 'crypto';
+
 const prisma = new PrismaClient();
+
+export const registrarCorreoUsuario = async (req, res) => {
+  const { correo } = req.body;
+
+  if (!correo) {
+    return res.status(400).json({ error: 'El correo es requerido' });
+  }
+
+  try {
+    // Intentar crear un usuario en Firebase Authentication
+    const userRecord = await admin.auth().createUser({
+      email: correo,
+      emailVerified: false,
+    });
+
+    // Generar un token para el registro
+    const token = randomBytes(20).toString('hex');
+    const link = `http://localhost:5173/usuarios?token=${token}`;
+
+    // Enviar el correo de invitación con el enlace de creación de cuenta
+    await enviarCorreoDeInvitacion(correo, link);
+
+    // Guardar el token en la base de datos
+    await prisma.tokens.create({
+      data: {
+        token,
+        correo,
+        expiracion: new Date(Date.now() + 3600000), // 1 hora de expiración
+      },
+    });
+
+    return res.status(200).json({ mensaje: 'Correo de invitación enviado al usuario' });
+  } catch (error) {
+    if (error.code === 'auth/email-already-exists') {
+      return res.status(400).json({ error: 'El correo ya está registrado.' });
+    }
+    console.error('Error al registrar el correo:', error);
+    return res.status(500).json({ error: 'Error al registrar el correo', details: error.message });
+  }
+};
+
 
 // Función de inicio de sesión
 export const iniciarSesion = async (req, res) => {
@@ -56,34 +100,58 @@ export const crearUsuario = async (req, res) => {
 
   try {
     // Hashear la contraseña antes de guardarla
-    const hashedPassword = await bcrypt.hash(contrasena, 10);  // 10 es el "cost" o nivel de seguridad
+    const hashedPassword = await bcrypt.hash(contrasena, 10); // 10 es el "cost" o nivel de seguridad
 
-    // Crear usuario en Firebase Authentication
-    const userRecord = await admin.auth().createUser({
-      email: correo,
-      password: contrasena,  // Se debe pasar la contraseña sin hash a Firebase
-      displayName: `${nombre} ${apellido_paterno} ${apellido_materno || ''}`,
-    });
+    let userRecord;
 
-    // Crear usuario en PostgreSQL (Prisma)
-    const nuevoUsuario = await prisma.usuario.create({
-      data: {
+    // Verificar si el correo ya existe en Firebase
+    try {
+      userRecord = await admin.auth().getUserByEmail(correo);
+    } catch (error) {
+      if (error.code === 'auth/user-not-found') {
+        // Si el usuario no existe en Firebase, crear uno nuevo
+        userRecord = await admin.auth().createUser({
+          email: correo,
+          password: contrasena, // Se debe pasar la contraseña sin hash a Firebase
+          displayName: `${nombre} ${apellido_paterno} ${apellido_materno || ''}`,
+        });
+      } else {
+        throw error; // Si es otro tipo de error, lo lanzamos
+      }
+    }
+
+    // Si el usuario ya existe en Firebase o fue creado, proceder a crear o actualizar en PostgreSQL
+    const nuevoUsuario = await prisma.usuario.upsert({
+      where: { rut }, // Aquí se actualiza si ya existe el usuario con el mismo RUT
+      update: {
+        nombre,
+        apellido_paterno,
+        apellido_materno: apellido_materno || null,
+        correo,
+        contrasena: hashedPassword, // Guardar la contraseña encriptada
+        rolId,
+        areaId_area,
+      },
+      create: {
         rut,
         nombre,
         apellido_paterno,
         apellido_materno: apellido_materno || null,
         correo,
-        contrasena: hashedPassword,  // Guardar la contraseña encriptada
+        contrasena: hashedPassword, // Guardar la contraseña encriptada
         rolId,
         areaId_area,
       },
     });
+
     res.status(201).json({ usuario: nuevoUsuario, firebaseUser: userRecord });
   } catch (error) {
     console.error('Error al crear el usuario:', error);
     res.status(500).json({ error: 'Error al crear el usuario', details: error.message });
   }
 };
+
+
 export const modificarUsuario = async (req, res) => {
   const { rut } = req.params;
   const { nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;

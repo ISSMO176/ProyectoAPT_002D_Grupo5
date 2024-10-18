@@ -4,7 +4,8 @@ import {
   crearUsuario,
   modificarUsuario,
   eliminarUsuario,
-  iniciarSesion, // Importar la función para iniciar sesión
+  iniciarSesion,
+  registrarCorreoUsuario, // Importar la función para registrar correos
 } from '../controllers/usuarioController.js';
 
 const router = express.Router();
@@ -23,5 +24,8 @@ router.delete('/:rut', eliminarUsuario);
 
 // Ruta para iniciar sesión
 router.post('/login', iniciarSesion); // Nueva ruta para iniciar sesión
+
+// Ruta para registrar un correo (Nueva)
+router.post('/registrarCorreo', registrarCorreoUsuario);  // Ruta para manejar el registro de correos
 
 export default router;
