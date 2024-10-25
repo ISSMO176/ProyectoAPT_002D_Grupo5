@@ -1,6 +1,9 @@
-// src/controllers/usuariosController.js
 import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_aqui'; // Cambia esto por un secreto más seguro
 
 // Obtener todos los usuarios
 export const obtenerUsuarios = async (req, res) => {
@@ -21,13 +24,15 @@ export const obtenerUsuarios = async (req, res) => {
 // Crear nuevo usuario
 export const crearUsuario = async (req, res) => {
   const { rut, nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
-  
+
   // Validar que todos los campos estén presentes
   if (!rut || !nombre || !apellido_paterno || !apellido_materno || !correo || !contrasena || !rolId || !areaId_area) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
   try {
+    // Encriptar la contraseña antes de almacenarla
+    const contrasenaEncriptada = await bcrypt.hash(contrasena, 10);
     const nuevoUsuario = await prisma.usuario.create({
       data: {
         rut,
@@ -35,7 +40,7 @@ export const crearUsuario = async (req, res) => {
         apellido_paterno,
         apellido_materno,
         correo,
-        contrasena,
+        contrasena: contrasenaEncriptada, // Usar la contraseña encriptada
         rolId,
         areaId_area,
       },
@@ -51,13 +56,14 @@ export const crearUsuario = async (req, res) => {
 export const modificarUsuario = async (req, res) => {
   const { rut } = req.params;
   const { nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
-  
+
   // Validar que todos los campos estén presentes
   if (!nombre || !apellido_paterno || !apellido_materno || !correo || !contrasena || !rolId || !areaId_area) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
   try {
+    const contrasenaEncriptada = await bcrypt.hash(contrasena, 10); // Encriptar nueva contraseña
     const usuarioModificado = await prisma.usuario.update({
       where: { rut },
       data: {
@@ -65,7 +71,7 @@ export const modificarUsuario = async (req, res) => {
         apellido_paterno,
         apellido_materno,
         correo,
-        contrasena,
+        contrasena: contrasenaEncriptada, // Usar la contraseña encriptada
         rolId,
         areaId_area,
       },
@@ -80,7 +86,7 @@ export const modificarUsuario = async (req, res) => {
 // Eliminar usuario
 export const eliminarUsuario = async (req, res) => {
   const { rut } = req.params;
-  
+
   try {
     await prisma.usuario.delete({
       where: { rut },
@@ -89,5 +95,89 @@ export const eliminarUsuario = async (req, res) => {
   } catch (error) {
     console.error('Error al eliminar el usuario:', error);
     res.status(500).json({ error: 'Error al eliminar el usuario', details: error.message });
+  }
+};
+
+// Función para login
+export const login = async (req, res) => {
+  const { correo, contrasena } = req.body;
+
+  // Validar que se envíen correo y contraseña
+  if (!correo || !contrasena) {
+    return res.status(400).json({ error: 'Faltan datos requeridos' });
+  }
+
+  try {
+    // Buscar al usuario por correo
+    const usuario = await prisma.usuario.findUnique({
+      where: { correo },
+    });
+
+    if (!usuario) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    // Verificar la contraseña
+    const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
+    if (!contrasenaValida) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    // Generar el token JWT
+    const token = jwt.sign({ id: usuario.rut, nombre: usuario.nombre }, JWT_SECRET, { expiresIn: '1h' });
+    
+    // Devolver el token y los datos del usuario (sin la contraseña)
+    res.status(200).json({ token, usuario: { ...usuario, contrasena: undefined } });
+  } catch (error) {
+    console.error('Error en el login:', error);
+    res.status(500).json({ error: 'Error en el login', details: error.message });
+  }
+};
+
+
+
+export const obtenerPerfil = async (req, res) => {
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { correo: req.usuario.correo }, // O el identificador que uses
+      select: {
+        nombre: true,
+        correo: true,
+        telefono: true, // Asegúrate de que estos campos existan en tu modelo
+        direccion: true,
+      },
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json(usuario);
+  } catch (error) {
+    console.error('Error al obtener el perfil:', error);
+    res.status(500).json({ error: 'Error al obtener el perfil', details: error.message });
+  }
+};
+
+// Actualizar perfil del usuario
+export const actualizarPerfil = async (req, res) => {
+  const { usuarioId } = req; // Suponiendo que el ID del usuario se obtiene del token
+  const { nombre, correo, telefono, direccion } = req.body;
+
+  try {
+    const usuarioActualizado = await prisma.usuario.update({
+      where: { id: usuarioId }, // Asegúrate de que 'id' es la clave primaria de usuario
+      data: {
+        nombre,
+        correo,
+        telefono,
+        direccion,
+      },
+    });
+
+    res.status(200).json(usuarioActualizado);
+  } catch (error) {
+    console.error('Error al actualizar perfil:', error);
+    res.status(500).json({ error: 'Error al actualizar perfil', details: error.message });
   }
 };

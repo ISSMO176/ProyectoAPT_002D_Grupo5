@@ -17,6 +17,17 @@ import Roles from '../components/Roles'; // Importar el componente Roles
 
 import Areas from '../components/Areas'; // Importar el componente Areas
 
+import { isAuthenticated } from '../services/authService'; // Servicio para verificar autenticación
+const PrivateRoute = ({ children }) => {
+  return isAuthenticated() ? children : <Navigate to="/login" />;
+};
+
+// Componente para rutas públicas (ejemplo: login)
+const PublicRoute = ({ children }) => {
+  return !isAuthenticated() ? children : <Navigate to="/dashboard" />;
+};
+
+
 const AppRouter = () => {
   return (
     <Routes>
@@ -35,6 +46,7 @@ const AppRouter = () => {
       <Route path="/modificar-encuesta/:idEncuesta" element={<ModificarEncuesta />} />
       <Route path="/roles" element={<Roles />} /> {/* Ruta para el listado de roles */}
       <Route path="/areas" element={<Areas />} /> {/* Corregido: usar 'element' en lugar de 'component' */}
+      <Route path="/login" element={<Login />} />
     </Routes>
   );
 };
