@@ -92,9 +92,10 @@ model Cumplimiento_leccion {
 }
 
 model Area {
-  id_area     Int       @id @default(autoincrement())
+  id_area     Int                 @id @default(autoincrement())
   nombre_area String
   usuarios    Usuario[]
+  encuestasAsignadas EncuestaAsignada[] 
 }
 
 model Rol {
@@ -117,9 +118,11 @@ model EncuestaAsignada {
   estado           String
   fecha_asignacion DateTime
   encuestaId       Int
-  usuarioId        String
+  usuarioId        String?
+  areaId           Int?
   encuesta         Encuesta @relation(fields: [encuestaId], references: [id_encuesta])
-  usuario          Usuario  @relation(fields: [usuarioId], references: [rut])
+  usuario          Usuario? @relation(fields: [usuarioId], references: [rut])
+  area             Area?    @relation(fields: [areaId], references: [id_area])
 }
 
 model Pregunta {

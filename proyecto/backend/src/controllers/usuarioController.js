@@ -98,42 +98,37 @@ export const eliminarUsuario = async (req, res) => {
   }
 };
 
-// Función para login
+// src/controllers/usuarioController.js
 export const login = async (req, res) => {
   const { correo, contrasena } = req.body;
 
-  // Validar que se envíen correo y contraseña
   if (!correo || !contrasena) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
   try {
-    // Buscar al usuario por correo
     const usuario = await prisma.usuario.findUnique({
       where: { correo },
+      include: { rol: true }, // Incluye el rol en la consulta
     });
 
-    if (!usuario) {
+    if (!usuario || !(await bcrypt.compare(contrasena, usuario.contrasena))) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    // Verificar la contraseña
-    const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
-    if (!contrasenaValida) {
-      return res.status(401).json({ error: 'Credenciales inválidas' });
-    }
+    // Generar el token JWT incluyendo el rol del usuario
+    const token = jwt.sign(
+      { id: usuario.rut, rol: usuario.rol.nombre_rol, areaId: usuario.areaId_area },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    // Generar el token JWT
-    const token = jwt.sign({ id: usuario.rut, nombre: usuario.nombre }, JWT_SECRET, { expiresIn: '1h' });
-    
-    // Devolver el token y los datos del usuario (sin la contraseña)
     res.status(200).json({ token, usuario: { ...usuario, contrasena: undefined } });
   } catch (error) {
     console.error('Error en el login:', error);
     res.status(500).json({ error: 'Error en el login', details: error.message });
   }
 };
-
 
 
 export const obtenerPerfil = async (req, res) => {
