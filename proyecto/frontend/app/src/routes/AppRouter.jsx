@@ -10,11 +10,11 @@ import Dashboard from '../components/Dashboard';
 import MisEncuestas from '../components/MisEncuestas';
 import Encuestasignada from '../components/Encuestasignada';
 import AsignarEncuestas from '../components/AsignarEncuestas';
-import AgregarPreguntas from '../components/AgregarPreguntas';
+import AgregarPreguntas from '../components/AgregarPreguntasVista';
 import CrearEncuesta from '../components/CrearEncuesta';
 import ModificarEncuesta from '../components/ModificarEncuesta';
 import Roles from '../components/Roles'; // Importar el componente Roles
-
+import AgregarPreguntasVista from '../components/AgregarPreguntasVista';
 import Areas from '../components/Areas'; // Importar el componente Areas
 
 import { isAuthenticated } from '../services/authService'; // Servicio para verificar autenticación
@@ -47,6 +47,7 @@ const AppRouter = () => {
       <Route path="/roles" element={<Roles />} /> {/* Ruta para el listado de roles */}
       <Route path="/areas" element={<Areas />} /> {/* Corregido: usar 'element' en lugar de 'component' */}
       <Route path="/login" element={<Login />} />
+      <Route path="/agregar-preguntas/:id" element={<AgregarPreguntasVista />} />
     </Routes>
   );
 };

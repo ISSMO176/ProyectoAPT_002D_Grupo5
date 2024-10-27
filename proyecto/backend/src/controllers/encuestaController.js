@@ -74,3 +74,23 @@ export const deshabilitarEncuesta = async (req, res) => {
     res.status(500).json({ error: 'Error al cambiar el estado de la encuesta' });
   }
 };
+
+export const obtenerEncuestaPorId = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const encuesta = await prisma.encuesta.findUnique({
+      where: { id_encuesta: parseInt(id) },
+      include: { preguntas: true }, // Incluye las preguntas si deseas obtenerlas junto con la encuesta
+    });
+
+    if (!encuesta) {
+      return res.status(404).json({ error: 'Encuesta no encontrada' });
+    }
+
+    res.status(200).json(encuesta);
+  } catch (error) {
+    console.error('Error al obtener la encuesta:', error);
+    res.status(500).json({ error: 'Error al obtener la encuesta', details: error.message });
+  }
+};

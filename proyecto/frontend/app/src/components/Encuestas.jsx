@@ -6,17 +6,18 @@ const Encuestas = () => {
   const [encuestas, setEncuestas] = useState([]);
   const navigate = useNavigate();
 
-  // Función para redirigir a la página de creación de encuestas
   const handleCrearEncuesta = () => {
     navigate('/crear-encuesta');
   };
 
-  // Función para redirigir a la página de modificación de encuestas
   const handleModificarEncuesta = (idEncuesta) => {
     navigate(`/modificar-encuesta/${idEncuesta}`);
   };
 
-  // Función para habilitar o deshabilitar una encuesta
+  const handleAgregarPreguntas = (idEncuesta) => {
+    navigate(`/agregar-preguntas/${idEncuesta}`);
+  };
+
   const handleToggleEncuesta = async (idEncuesta, estadoActual) => {
     const nuevoEstado = estadoActual === 'Activa' ? 'Deshabilitada' : 'Activa';
     try {
@@ -27,7 +28,6 @@ const Encuestas = () => {
     }
   };
 
-  
   const fetchEncuestas = async () => {
     try {
       const response = await axios.get('http://localhost:4000/api/encuestas');
@@ -42,41 +42,44 @@ const Encuestas = () => {
   }, []);
 
   return (
-    <div>
-      <div className="header">
-        <img src="/logo.png" alt="Logo" />
-        <div>
-          <button className="btn btn-outline-light me-2">ENCUESTAS</button>
-          <button className="btn btn-dark">Perfil</button>
-        </div>
+    <div className="container mt-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gestión de Encuestas</h2>
+        <button className="btn btn-success" onClick={handleCrearEncuesta}>
+          Crear Nueva Encuesta
+        </button>
       </div>
 
-      <div className="encuestas-container">
-        <button className="btn btn-success mb-3" onClick={handleCrearEncuesta}>
-          Crear Encuesta
-        </button>
-
+      <div className="row">
         {encuestas.length > 0 ? (
           encuestas.map(encuesta => (
-            <div className="encuesta-card" key={encuesta.id_encuesta}>
-              <div>
-                <div className="encuesta-titulo">{encuesta.titulo}</div>
-                <div className="encuesta-area">Estado: {encuesta.estado_encuesta}</div>
-                <div className="encuesta-fecha">Fecha de Creación: {new Date(encuesta.fecha_creacion).toLocaleDateString()}</div>
-              </div>
-              <div>
-                <button
-                  className="btn btn-warning me-2"
-                  onClick={() => handleModificarEncuesta(encuesta.id_encuesta)}
-                >
-                  Modificar
-                </button>
-                <button
-                  className={`btn ${encuesta.estado_encuesta === 'Activa' ? 'btn-danger' : 'btn-success'}`}
-                  onClick={() => handleToggleEncuesta(encuesta.id_encuesta, encuesta.estado_encuesta)}
-                >
-                  {encuesta.estado_encuesta === 'Activa' ? 'Deshabilitar' : 'Habilitar'}
-                </button>
+            <div className="col-md-6 mb-4" key={encuesta.id_encuesta}>
+              <div className="card">
+                <div className="card-body">
+                  <h5 className="card-title">{encuesta.titulo}</h5>
+                  <p className="card-text">Estado: <strong>{encuesta.estado_encuesta}</strong></p>
+                  <p className="card-text">Fecha de Creación: {new Date(encuesta.fecha_creacion).toLocaleDateString()}</p>
+                  <div className="d-flex justify-content-between mt-4">
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => handleModificarEncuesta(encuesta.id_encuesta)}
+                    >
+                      Modificar
+                    </button>
+                    <button
+                      className={`btn ${encuesta.estado_encuesta === 'Activa' ? 'btn-danger' : 'btn-success'}`}
+                      onClick={() => handleToggleEncuesta(encuesta.id_encuesta, encuesta.estado_encuesta)}
+                    >
+                      {encuesta.estado_encuesta === 'Activa' ? 'Deshabilitar' : 'Habilitar'}
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handleAgregarPreguntas(encuesta.id_encuesta)}
+                    >
+                      Agregar Preguntas
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           ))
