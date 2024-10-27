@@ -143,8 +143,6 @@ export const obtenerPerfil = async (req, res) => {
       select: {
         nombre: true,
         correo: true,
-        telefono: true, // Asegúrate de que estos campos existan en tu modelo
-        direccion: true,
       },
     });
 
@@ -170,8 +168,6 @@ export const actualizarPerfil = async (req, res) => {
       data: {
         nombre,
         correo,
-        telefono,
-        direccion,
       },
     });
 
