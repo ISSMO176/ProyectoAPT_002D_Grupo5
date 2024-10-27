@@ -1,40 +1,56 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const MisEncuestas = () => {
+  const [encuestas, setEncuestas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEncuestasAsignadas = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Obtener el token de localStorage
+        const response = await axios.get('http://localhost:4000/api/encuestas-asignadas/mis-encuestas', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Enviar el token con prefijo Bearer
+          },
+        });
+        setEncuestas(response.data); // Guardar las encuestas en el estado
+      } catch (error) {
+        console.error('Error al obtener encuestas asignadas:', error); // Mostrar error si ocurre
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEncuestasAsignadas();
+  }, []);
+
+  if (loading) {
+    return <p>Cargando encuestas...</p>;
+  }
+
   return (
-    
-    <div className="">
-            {}
-      <div className="header d-flex justify-content-between align-items-center p-3  text-light shadow">
-        <img src="/logo.png" alt="Logo" className="logo" style={{ width: '100px' }} />
-        <div>
-          <button className="btn btn-outline-light me-2">ENCUESTAS</button>
-          <button className="btn btn-dark">Perfil</button>
-        </div>
-      </div>
-      <h2 className="text-center mb-4" style={{ color: '#dc3545', fontWeight: 'bold' }}>
-        Mis Encuestas
-      </h2>
-      <div className="d-flex justify-content-center">
-        <div className="card" style={{ width: '80%', border: 'none', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.2)' }}>
-          <div className="card-body">
-            <div className="list-group">
-              {}
-              <div className="list-group-item" style={{ backgroundColor: '#f8f9fa', border: '1px solid #dc3545', borderRadius: '10px', marginBottom: '10px', color: '#dc3545', fontWeight: 'bold', padding: '15px' }}>
-                Encuesta de Satisfacción Laboral
-              </div>
-              {}
-              <div className="list-group-item" style={{ backgroundColor: '#f8f9fa', border: '1px solid #dc3545', borderRadius: '10px', marginBottom: '10px', color: '#dc3545', fontWeight: 'bold', padding: '15px' }}>
-                Encuesta de Clima Laboral
-              </div>
-              {}
-              <div className="list-group-item" style={{ backgroundColor: '#f8f9fa', border: '1px solid #dc3545', borderRadius: '10px', marginBottom: '10px', color: '#dc3545', fontWeight: 'bold', padding: '15px' }}>
-                Encuesta de Salud y Bienestar
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="container mt-4">
+      <h2>Mis Encuestas Asignadas</h2>
+      {encuestas.length > 0 ? (
+        <ul className="list-group mt-3">
+          {encuestas.map((encuestaAsignada) => (
+            <li key={encuestaAsignada.id_asignacion} className="list-group-item">
+              <h4>{encuestaAsignada.encuesta.titulo}</h4>
+              <p>Fecha de Asignación: {new Date(encuestaAsignada.fecha_asignacion).toLocaleDateString()}</p>
+              <p>Estado: {encuestaAsignada.estado}</p>
+              <p>Preguntas:</p>
+              <ul>
+                {encuestaAsignada.encuesta.preguntas.map((pregunta) => (
+                  <li key={pregunta.id_pregunta}>{pregunta.texto_pregunta}</li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No tienes encuestas asignadas.</p>
+      )}
     </div>
   );
 };

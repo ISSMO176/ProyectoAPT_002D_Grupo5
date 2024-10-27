@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Login = () => {
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Instancia el hook useNavigate
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Reiniciar el error
+    setError('');
 
     try {
       const response = await axios.post('http://localhost:4000/api/usuarios/login', {
@@ -19,11 +19,11 @@ const Login = () => {
         contrasena,
       });
 
-      // Almacenar el token en el almacenamiento local
+      // Guardar el token en localStorage
       localStorage.setItem('token', response.data.token);
 
-      // Redirigir a la página de MisEncuestas
-      navigate('/misencuestas'); // Usa navigate para redirigir
+      // Redirigir a la página MisEncuestas
+      navigate('/misencuestas');
     } catch (err) {
       setError('Credenciales inválidas. Intenta nuevamente.');
       console.error('Error en el login:', err.response ? err.response.data : err);

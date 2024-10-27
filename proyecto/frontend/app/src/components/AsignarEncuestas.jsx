@@ -1,3 +1,4 @@
+// src/components/AsignarEncuestas.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -6,12 +7,11 @@ const AsignarEncuestas = () => {
   const [areas, setAreas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [encuestaId, setEncuestaId] = useState('');
-  const [tipoAsignacion, setTipoAsignacion] = useState('usuario'); // 'usuario' o 'area'
+  const [tipoAsignacion, setTipoAsignacion] = useState('usuarios'); // 'usuarios' o 'area'
   const [usuariosSeleccionados, setUsuariosSeleccionados] = useState([]); // Array para múltiples usuarios
   const [areaId, setAreaId] = useState('');
   const [message, setMessage] = useState('');
 
-  // Cargar encuestas disponibles
   useEffect(() => {
     const fetchEncuestas = async () => {
       try {
@@ -22,11 +22,6 @@ const AsignarEncuestas = () => {
       }
     };
 
-    fetchEncuestas();
-  }, []);
-
-  // Cargar áreas disponibles
-  useEffect(() => {
     const fetchAreas = async () => {
       try {
         const response = await axios.get('http://localhost:4000/api/areas');
@@ -36,11 +31,6 @@ const AsignarEncuestas = () => {
       }
     };
 
-    fetchAreas();
-  }, []);
-
-  // Cargar usuarios disponibles
-  useEffect(() => {
     const fetchUsuarios = async () => {
       try {
         const response = await axios.get('http://localhost:4000/api/usuarios');
@@ -50,28 +40,23 @@ const AsignarEncuestas = () => {
       }
     };
 
+    fetchEncuestas();
+    fetchAreas();
     fetchUsuarios();
   }, []);
 
-  // Manejar envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(''); // Limpiar mensajes previos
+    setMessage('');
 
     try {
-      if (tipoAsignacion === 'usuario') {
-        // Asignar encuesta a múltiples usuarios
-        await Promise.all(
-          usuariosSeleccionados.map(usuarioId =>
-            axios.post('http://localhost:4000/api/encuestas-asignadas/usuario', {
-              encuestaId,
-              usuarioId,
-            })
-          )
-        );
-        setMessage(`Encuesta asignada a los usuarios seleccionados`);
+      if (tipoAsignacion === 'usuarios') {
+        await axios.post('http://localhost:4000/api/encuestas-asignadas/usuarios', {
+          encuestaId,
+          usuariosIds: usuariosSeleccionados,
+        });
+        setMessage('Encuesta asignada a los usuarios seleccionados');
       } else {
-        // Asignar encuesta a área
         await axios.post('http://localhost:4000/api/encuestas-asignadas/area', {
           encuestaId,
           areaId,
@@ -79,7 +64,6 @@ const AsignarEncuestas = () => {
         setMessage(`Encuesta asignada al área ${areaId}`);
       }
 
-      // Limpiar los campos de entrada
       setEncuestaId('');
       setUsuariosSeleccionados([]);
       setAreaId('');
@@ -89,7 +73,6 @@ const AsignarEncuestas = () => {
     }
   };
 
-  // Manejar selección de múltiples usuarios
   const handleUsuarioChange = (e) => {
     const selectedOptions = Array.from(e.target.selectedOptions);
     const selectedValues = selectedOptions.map(option => option.value);
@@ -127,12 +110,12 @@ const AsignarEncuestas = () => {
             onChange={(e) => setTipoAsignacion(e.target.value)}
             className="form-select"
           >
-            <option value="usuario">Usuarios específicos</option>
+            <option value="usuarios">Usuarios específicos</option>
             <option value="area">Todos los usuarios del área</option>
           </select>
         </div>
 
-        {tipoAsignacion === 'usuario' ? (
+        {tipoAsignacion === 'usuarios' ? (
           <div className="mb-3">
             <label htmlFor="usuarioId" className="form-label">Seleccionar Usuarios:</label>
             <select

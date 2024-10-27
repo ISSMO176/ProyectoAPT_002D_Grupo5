@@ -5,6 +5,44 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_aqui'; // Cambia esto por un secreto más seguro
 
+// Método de login
+export const login = async (req, res) => {
+  const { correo, contrasena } = req.body;
+
+  if (!correo || !contrasena) {
+    return res.status(400).json({ error: 'Faltan datos requeridos' });
+  }
+
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { correo },
+      include: { rol: true }, // Incluye el rol en la consulta
+    });
+
+    // Verificar que el usuario exista y que la contraseña sea correcta
+    if (!usuario || !(await bcrypt.compare(contrasena, usuario.contrasena))) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    // Generar el token JWT con los datos necesarios
+    const token = jwt.sign(
+      {
+        id: usuario.rut,
+        rol: usuario.rol.nombre_rol,
+        areaId: usuario.areaId_area,
+      },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Responder con el token y los datos del usuario sin la contraseña
+    res.status(200).json({ token, usuario: { ...usuario, contrasena: undefined } });
+  } catch (error) {
+    console.error('Error en el login:', error);
+    res.status(500).json({ error: 'Error en el login', details: error.message });
+  }
+};
+
 // Obtener todos los usuarios
 export const obtenerUsuarios = async (req, res) => {
   try {
@@ -98,37 +136,7 @@ export const eliminarUsuario = async (req, res) => {
   }
 };
 
-// src/controllers/usuarioController.js
-export const login = async (req, res) => {
-  const { correo, contrasena } = req.body;
 
-  if (!correo || !contrasena) {
-    return res.status(400).json({ error: 'Faltan datos requeridos' });
-  }
-
-  try {
-    const usuario = await prisma.usuario.findUnique({
-      where: { correo },
-      include: { rol: true }, // Incluye el rol en la consulta
-    });
-
-    if (!usuario || !(await bcrypt.compare(contrasena, usuario.contrasena))) {
-      return res.status(401).json({ error: 'Credenciales inválidas' });
-    }
-
-    // Generar el token JWT incluyendo el rol del usuario
-    const token = jwt.sign(
-      { id: usuario.rut, rol: usuario.rol.nombre_rol, areaId: usuario.areaId_area },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    res.status(200).json({ token, usuario: { ...usuario, contrasena: undefined } });
-  } catch (error) {
-    console.error('Error en el login:', error);
-    res.status(500).json({ error: 'Error en el login', details: error.message });
-  }
-};
 
 
 export const obtenerPerfil = async (req, res) => {
