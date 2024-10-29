@@ -3,49 +3,49 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const asignarEncuesta = async (req, res) => {
-  const { encuestaId, usuarioIds, areaId, estado = "pendiente", fecha_asignacion = new Date() } = req.body;
+    const { encuestaId, usuarioIds, areaId, estado = "pendiente", fecha_asignacion = new Date() } = req.body;
 
-  try {
-      let usuariosAsignar = [];
+    try {
+        let usuariosAsignar = [];
 
-      // Si se proporciona areaId, obtener todos los usuarios de esa área
-      if (areaId) {
-          const usuariosEnArea = await prisma.usuario.findMany({
-              where: { areaId_area: areaId },
-              select: { rut: true }
-          });
-          usuariosAsignar = usuariosEnArea.map(usuario => usuario.rut);
-      }
+        // Si se proporciona areaId, obtener todos los usuarios de esa área
+        if (areaId) {
+            const usuariosEnArea = await prisma.usuario.findMany({
+                where: { areaId_area: parseInt(areaId) }, // Convertir areaId a entero
+                select: { rut: true }
+            });
+            usuariosAsignar = usuariosEnArea.map(usuario => usuario.rut);
+        }
 
-      // Si se proporciona usuarioIds, añadirlos a la lista
-      if (usuarioIds && usuarioIds.length > 0) {
-          usuariosAsignar = [...usuariosAsignar, ...usuarioIds];
-      }
+        // Si se proporciona usuarioIds, añadirlos a la lista
+        if (usuarioIds && usuarioIds.length > 0) {
+            usuariosAsignar = [...usuariosAsignar, ...usuarioIds];
+        }
 
-      // Verificar que al menos hay un usuario para asignar
-      if (usuariosAsignar.length === 0) {
-          return res.status(400).json({ error: 'No se seleccionaron usuarios ni área' });
-      }
+        // Verificar que al menos hay un usuario para asignar
+        if (usuariosAsignar.length === 0) {
+            return res.status(400).json({ error: 'No se seleccionaron usuarios ni área' });
+        }
 
-      // Crear las asignaciones de encuestas para cada usuario en la lista
-      const asignaciones = await Promise.all(
-          usuariosAsignar.map(usuarioId =>
-              prisma.encuestaAsignada.create({
-                  data: {
-                      encuestaId: parseInt(encuestaId), // Asegúrate de que encuestaId sea un número
-                      usuarioId,
-                      estado,
-                      fecha_asignacion
-                  }
-              })
-          )
-      );
+        // Crear las asignaciones de encuestas para cada usuario en la lista
+        const asignaciones = await Promise.all(
+            usuariosAsignar.map(usuarioId =>
+                prisma.encuestaAsignada.create({
+                    data: {
+                        encuestaId: parseInt(encuestaId), // Asegúrate de que encuestaId sea un número
+                        usuarioId,
+                        estado,
+                        fecha_asignacion
+                    }
+                })
+            )
+        );
 
-      res.json(asignaciones);
-  } catch (error) {
-      console.error('Error al asignar la encuesta:', error);
-      res.status(500).json({ error: 'Error al asignar la encuesta', details: error.message });
-  }
+        res.json(asignaciones);
+    } catch (error) {
+        console.error('Error al asignar la encuesta:', error);
+        res.status(500).json({ error: 'Error al asignar la encuesta', details: error.message });
+    }
 };
 
 export const obtenerEncuestasAsignadas = async (req, res) => {
