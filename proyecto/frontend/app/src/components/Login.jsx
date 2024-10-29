@@ -19,10 +19,8 @@ const Login = () => {
         contrasena,
       });
 
-      // Guardar el token en localStorage
       localStorage.setItem('token', response.data.token);
 
-      // Redirigir a la página MisEncuestas
       navigate('/misencuestas');
     } catch (err) {
       setError('Credenciales inválidas. Intenta nuevamente.');
@@ -31,8 +29,8 @@ const Login = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100">
-      <form onSubmit={handleSubmit} className="bg-light p-5 rounded shadow w-100" style={{ maxWidth: '400px' }}>
+    <div className="login-container d-flex justify-content-center align-items-center vh-100">
+      <form onSubmit={handleSubmit} className="w-100">
         <h2 className="text-center mb-4">Iniciar Sesión</h2>
         {error && <div className="alert alert-danger">{error}</div>}
         <div className="form-group mb-3">

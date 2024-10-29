@@ -1,104 +1,209 @@
-/* Estilos generales */
-body {
-    background-color: #f8f9fa; /* Fondo claro */
-    font-family: Arial, sans-serif;
-  }
-  
-  /* Estilos del header */
-  .header {
-    background-color: #b80000; /* Fondo rojo para el header */
-    color: white;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .header img {
-    height: 40px;
-  }
-  
-  .header button {
-    background-color: black; /* Botón de perfil con fondo negro */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-  }
-  
-  .header button:hover {
-    background-color: #333; /* Cambio de color en hover para el botón Perfil */
-  }
-  
-  /* Estilos para las encuestas */
-  .encuestas-container {
-    padding: 20px;
-    margin: 0 auto;
-    max-width: 800px; /* Limitar el ancho para centrar */
-  }
-  
-  .encuesta-card {
-    background-color: white;
-    padding: 20px;
-    margin-bottom: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-left: 4px solid #b80000; /* Línea roja a la izquierda */
-  }
-  
-  .encuesta-titulo {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .encuesta-area {
-    font-size: 14px;
-    color: #777; /* Color gris claro para los detalles del área */
-  }
-  
-  /* Botones */
-  .btn-habilitar {
-    background-color: #b80000; /* Color rojo del botón Habilitar/Deshabilitar */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    margin-left: 10px;
-  }
-  
-  .btn-habilitar:hover {
-    background-color: #a00000; /* Oscurecer el rojo al pasar el ratón */
-  }
-  
-  .btn-modificar {
-    background-color: #f0ad4e; /* Color anaranjado del botón Modificar */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    margin-left: 10px;
-  }
-  
-  .btn-modificar:hover {
-    background-color: #ec971f; /* Oscurecer el naranja al pasar el ratón */
-  }
-  
-  /* Botón de crear */
-  .btn-crear {
-    background-color: green;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-  }
-  
-  .btn-crear:hover {
-    background-color: darkgreen; /* Oscurecer el verde en hover */
-  }
-  
-  
+
+body.light-theme.login-page,
+body.light-theme.login-page .login-container {
+  background-color: #ffffff !important;
+}
+
+.login-container {
+  background-color: #f8f9fa; 
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 100px auto;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body.light-theme {
+  background-color: #f8f9fa;
+  color: #212529;
+  font-family: Arial, sans-serif;
+}
+
+.light-theme .encuesta-card {
+  background-color: white;
+  border-left-color: #b80000;
+}
+
+.light-theme .btn-habilitar {
+  background-color: #b80000; /* Rojo para habilitar/deshabilitar */
+}
+
+.light-theme .btn-crear {
+  background-color: green;
+}
+
+/* Estilos generales para el tema oscuro */
+body.dark-theme {
+  background-color: #121212; /* Fondo oscuro */
+  color: #e0e0e0; /* Texto claro */
+  font-family: Arial, sans-serif;
+}
+
+.dark-theme .encuesta-card {
+  background-color: #333; /* Fondo oscuro de la tarjeta */
+  border-left-color: #ff4d4d; /* Línea roja más clara */
+}
+
+.dark-theme .btn-habilitar {
+  background-color: #ff4d4d; /* Rojo claro para habilitar/deshabilitar */
+}
+
+.dark-theme .btn-crear {
+  background-color: #2e8b57; /* Verde oscuro */
+}
+
+/* Estilos del header */
+.header {
+  background-color: #b80000; /* Fondo rojo para el header */
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header img {
+  height: 40px;
+}
+
+.header button {
+  background-color: black; /* Botón de perfil con fondo negro */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.header button:hover {
+  background-color: #333; /* Cambio de color en hover para el botón Perfil */
+}
+
+/* Estilos para las encuestas */
+.encuestas-container {
+  padding: 20px;
+  margin: 0 auto;
+  max-width: 800px; /* Limitar el ancho para centrar */
+}
+
+.encuesta-card {
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.encuesta-titulo {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.encuesta-area {
+  font-size: 14px;
+  color: #777; /* Color gris claro para los detalles del área */
+}
+
+/* Botones */
+.btn-habilitar {
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-left: 10px;
+}
+
+.btn-modificar {
+  background-color: #f0ad4e; /* Color anaranjado del botón Modificar */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-left: 10px;
+}
+
+.btn-modificar:hover {
+  background-color: #ec971f; /* Oscurecer el naranja al pasar el ratón */
+}
+
+/* Botón de crear */
+.btn-crear {
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.btn-crear:hover {
+  background-color: darkgreen; /* Oscurecer el verde en hover */
+}
+
+/* Estilos adicionales para mejorar el contraste */
+.bg-dark {
+  background-color: #343a40 !important;
+}
+
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+.text-light {
+  color: #f8f9fa !important;
+}
+
+.text-dark {
+  color: #343a40 !important;
+}
+
+.card {
+  transition: all 0.3s ease;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+body.light-theme.login-page {
+  background-color: #ffffff !important;
+}
+
+.login-container {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 100px auto;
+}
+
+.login-container h2 {
+  text-align: center;
+  color: #333; 
+}
+
+.login-container input {
+  margin-bottom: 10px;
+}
+
+.login-container button {
+  background-color: #d9534f;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login-container button:hover {
+  background-color: #c9302c;
+}
