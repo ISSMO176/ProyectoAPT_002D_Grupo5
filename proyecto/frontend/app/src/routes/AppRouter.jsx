@@ -5,7 +5,6 @@ import Encuestas from '../components/Encuestas';
 import Perfil from '../components/Perfil';
 import Usuarios from '../components/Usuarios';
 import Preguntas from '../components/Preguntas';
-import Respuestas from '../components/Respuestas';
 import Dashboard from '../components/Dashboard';
 import MisEncuestas from '../components/MisEncuestas';
 import Encuestasignada from '../components/Encuestasignada';
@@ -16,6 +15,7 @@ import ModificarEncuesta from '../components/ModificarEncuesta';
 import Roles from '../components/Roles'; // Importar el componente Roles
 import AgregarPreguntasVista from '../components/AgregarPreguntasVista';
 import Areas from '../components/Areas'; // Importar el componente Areas
+import ResponderEncuesta from '../components/ResponderEncuesta';
 
 import { isAuthenticated } from '../services/authService'; // Servicio para verificar autenticación
 const PrivateRoute = ({ children }) => {
@@ -37,7 +37,6 @@ const AppRouter = () => {
       <Route path="/perfil" element={<Perfil />} />
       <Route path="/usuarios" element={<Usuarios />} />
       <Route path="/preguntas" element={<Preguntas />} />
-      <Route path="/respuestas" element={<Respuestas />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/encuestasignada" element={<Encuestasignada />} />
       <Route path="/asignarencuestas" element={<AsignarEncuestas />} />
@@ -48,6 +47,7 @@ const AppRouter = () => {
       <Route path="/areas" element={<Areas />} /> {/* Corregido: usar 'element' en lugar de 'component' */}
       <Route path="/login" element={<Login />} />
       <Route path="/agregar-preguntas/:id" element={<AgregarPreguntasVista />} />
+      <Route path="/responderEncuesta/:encuestaId" element={<ResponderEncuesta />} />
     </Routes>
   );
 };

@@ -1,6 +1,7 @@
 // src/components/MisEncuestas.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const MisEncuestas = () => {
     const [encuestas, setEncuestas] = useState([]);
@@ -27,7 +28,9 @@ const MisEncuestas = () => {
                 {encuestas.map(encuesta => (
                     <li key={encuesta.id_asignacion} className="list-group-item d-flex justify-content-between align-items-center">
                         {encuesta.encuesta.titulo}
-                        <span className="badge bg-primary">{encuesta.estado}</span>
+                        <Link to={`/responderEncuesta/${encuesta.encuestaId}`} className="btn btn-primary btn-sm">
+                            Responder
+                        </Link>
                     </li>
                 ))}
             </ul>

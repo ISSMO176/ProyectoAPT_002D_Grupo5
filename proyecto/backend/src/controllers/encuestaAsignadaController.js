@@ -61,3 +61,33 @@ export const obtenerEncuestasAsignadas = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener las encuestas asignadas' });
     }
 };
+
+export const obtenerPreguntasDeEncuestaAsignada = async (req, res) => {
+  const { encuestaId } = req.params;
+
+  try {
+      const preguntas = await prisma.pregunta.findMany({
+          where: { encuestaId: parseInt(encuestaId) },
+          select: {
+              id_pregunta: true,
+              texto_pregunta: true,
+              tipo_respuesta: true,
+              opciones: {
+                  select: {
+                      id_opcion: true,
+                      texto_opcion: true
+                  }
+              }
+          }
+      });
+
+      if (!preguntas || preguntas.length === 0) {
+          return res.status(404).json({ error: 'No se encontraron preguntas para esta encuesta' });
+      }
+
+      res.json(preguntas);
+  } catch (error) {
+      console.error('Error al obtener preguntas de la encuesta:', error);
+      res.status(500).json({ error: 'Error al obtener preguntas de la encuesta', details: error.message });
+  }
+};

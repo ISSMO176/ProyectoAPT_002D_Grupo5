@@ -6,6 +6,7 @@ import rolRoutes from './routes/rolRoutes.js';
 import areaRoutes from './routes/areaRoutes.js';
 import preguntaRoutes from './routes/preguntaRoutes.js';
 import encuestaAsignadaRoutes from './routes/encuestaAsignadaRoutes.js';
+import respuestaRoutes from './routes/respuestaRoutes.js';
 const app = express();
 
 // Configurar CORS
@@ -30,6 +31,8 @@ app.use('/api/preguntas', preguntaRoutes);
 
 //app.use('/api/auth', usuarioRoutes);
 app.use('/api/encuestasAsignada', encuestaAsignadaRoutes);
+
+app.use('/api/respuestas', respuestaRoutes);
 
 const PORT = process.env.PORT || 4000; // Cambia esto a 4000
 app.listen(PORT, () => {
