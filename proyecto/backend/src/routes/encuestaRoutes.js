@@ -4,9 +4,10 @@ import { crearEncuesta, obtenerEncuestas, actualizarEncuesta, deshabilitarEncues
 const router = Router();
 
 // Rutas
-router.get('/', obtenerEncuestas); // Esta línea debe estar presente
+router.get('/', obtenerEncuestas); 
 router.post('/', crearEncuesta);
 router.put('/:id', actualizarEncuesta);
 router.put('/deshabilitar/:id', deshabilitarEncuesta);
 router.get('/:id', obtenerEncuestaPorId);
+
 export default router;

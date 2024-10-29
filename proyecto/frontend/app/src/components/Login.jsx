@@ -1,68 +1,55 @@
+// src/components/Login.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Login = () => {
-  const [correo, setCorreo] = useState('');
-  const [contrasena, setContrasena] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+    const [rut, setRut] = useState('');
+    const [contrasena, setContrasena] = useState('');
+    const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('http://localhost:4000/api/usuarios/login', { rut, contrasena });
+            localStorage.setItem('token', response.data.token);
+            navigate('/misEncuestas');
+        } catch (error) {
+            console.error('Error en el login', error);
+            alert('Credenciales incorrectas');
+        }
+    };
 
-    try {
-      const response = await axios.post('http://localhost:4000/api/usuarios/login', {
-        correo,
-        contrasena,
-      });
-
-      // Guardar el token en localStorage
-      localStorage.setItem('token', response.data.token);
-
-      // Redirigir a la página MisEncuestas
-      navigate('/misencuestas');
-    } catch (err) {
-      setError('Credenciales inválidas. Intenta nuevamente.');
-      console.error('Error en el login:', err.response ? err.response.data : err);
-    }
-  };
-
-  return (
-    <div className="d-flex justify-content-center align-items-center vh-100">
-      <form onSubmit={handleSubmit} className="bg-light p-5 rounded shadow w-100" style={{ maxWidth: '400px' }}>
-        <h2 className="text-center mb-4">Iniciar Sesión</h2>
-        {error && <div className="alert alert-danger">{error}</div>}
-        <div className="form-group mb-3">
-          <label htmlFor="correo">Correo:</label>
-          <input
-            type="email"
-            id="correo"
-            value={correo}
-            onChange={(e) => setCorreo(e.target.value)}
-            className="form-control"
-            required
-          />
+    return (
+        <div className="container mt-5">
+            <h2 className="text-center">Iniciar Sesión</h2>
+            <form onSubmit={handleLogin} className="mx-auto" style={{ maxWidth: '400px' }}>
+                <div className="form-group mb-3">
+                    <label htmlFor="rut">RUT</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="rut"
+                        value={rut}
+                        onChange={(e) => setRut(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="form-group mb-3">
+                    <label htmlFor="contrasena">Contraseña</label>
+                    <input
+                        type="password"
+                        className="form-control"
+                        id="contrasena"
+                        value={contrasena}
+                        onChange={(e) => setContrasena(e.target.value)}
+                        required
+                    />
+                </div>
+                <button type="submit" className="btn btn-primary w-100">Ingresar</button>
+            </form>
         </div>
-        <div className="form-group mb-4">
-          <label htmlFor="contrasena">Contraseña:</label>
-          <input
-            type="password"
-            id="contrasena"
-            value={contrasena}
-            onChange={(e) => setContrasena(e.target.value)}
-            className="form-control"
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-danger w-100">
-          Iniciar Sesión
-        </button>
-      </form>
-    </div>
-  );
+    );
 };
 
 export default Login;

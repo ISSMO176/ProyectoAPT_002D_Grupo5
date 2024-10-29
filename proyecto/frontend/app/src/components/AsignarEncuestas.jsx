@@ -3,163 +3,124 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AsignarEncuestas = () => {
-  const [encuestas, setEncuestas] = useState([]);
-  const [areas, setAreas] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
-  const [encuestaId, setEncuestaId] = useState('');
-  const [tipoAsignacion, setTipoAsignacion] = useState('usuarios'); // 'usuarios' o 'area'
-  const [usuariosSeleccionados, setUsuariosSeleccionados] = useState([]); // Array para múltiples usuarios
-  const [areaId, setAreaId] = useState('');
-  const [message, setMessage] = useState('');
+    const [encuestaId, setEncuestaId] = useState('');
+    const [usuarioIds, setUsuarioIds] = useState([]);
+    const [areaId, setAreaId] = useState('');
+    const [usuarios, setUsuarios] = useState([]);
+    const [areas, setAreas] = useState([]);
+    const [encuestas, setEncuestas] = useState([]); // Nueva variable para almacenar encuestas
 
-  useEffect(() => {
-    const fetchEncuestas = async () => {
-      try {
-        const response = await axios.get('http://localhost:4000/api/encuestas');
-        setEncuestas(response.data);
-      } catch (error) {
-        console.error('Error al cargar encuestas:', error);
-      }
+    useEffect(() => {
+        const fetchUsuarios = async () => {
+            try {
+                const response = await axios.get('http://localhost:4000/api/usuarios');
+                setUsuarios(response.data);
+            } catch (error) {
+                console.error('Error al obtener usuarios:', error);
+            }
+        };
+
+        const fetchAreas = async () => {
+            try {
+                const response = await axios.get('http://localhost:4000/api/areas');
+                setAreas(response.data);
+            } catch (error) {
+                console.error('Error al obtener áreas:', error);
+            }
+        };
+
+        const fetchEncuestas = async () => {
+            try {
+                const response = await axios.get('http://localhost:4000/api/encuestas');
+                setEncuestas(response.data);
+            } catch (error) {
+                console.error('Error al obtener encuestas:', error);
+            }
+        };
+
+        fetchUsuarios();
+        fetchAreas();
+        fetchEncuestas();
+    }, []);
+
+    const handleAsignar = async () => {
+        if (!encuestaId) {
+            alert("Seleccione una encuesta para asignar.");
+            return;
+        }
+
+        try {
+            await axios.post('http://localhost:4000/api/encuestasAsignada/asignar', {
+                encuestaId: parseInt(encuestaId), // Asegúrate de enviar encuestaId como un número
+                usuarioIds: usuarioIds.length > 0 ? usuarioIds : null,
+                areaId: areaId || null,
+            });
+            alert('Encuesta asignada con éxito');
+        } catch (error) {
+            console.error('Error al asignar encuesta', error);
+            alert('Error al asignar encuesta');
+        }
     };
 
-    const fetchAreas = async () => {
-      try {
-        const response = await axios.get('http://localhost:4000/api/areas');
-        setAreas(response.data);
-      } catch (error) {
-        console.error('Error al cargar áreas:', error);
-      }
-    };
-
-    const fetchUsuarios = async () => {
-      try {
-        const response = await axios.get('http://localhost:4000/api/usuarios');
-        setUsuarios(response.data);
-      } catch (error) {
-        console.error('Error al cargar usuarios:', error);
-      }
-    };
-
-    fetchEncuestas();
-    fetchAreas();
-    fetchUsuarios();
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('');
-
-    try {
-      if (tipoAsignacion === 'usuarios') {
-        await axios.post('http://localhost:4000/api/encuestas-asignadas/usuarios', {
-          encuestaId,
-          usuariosIds: usuariosSeleccionados,
-        });
-        setMessage('Encuesta asignada a los usuarios seleccionados');
-      } else {
-        await axios.post('http://localhost:4000/api/encuestas-asignadas/area', {
-          encuestaId,
-          areaId,
-        });
-        setMessage(`Encuesta asignada al área ${areaId}`);
-      }
-
-      setEncuestaId('');
-      setUsuariosSeleccionados([]);
-      setAreaId('');
-    } catch (error) {
-      console.error('Error al asignar encuesta:', error);
-      setMessage('Error al asignar encuesta. Por favor, inténtalo nuevamente.');
-    }
-  };
-
-  const handleUsuarioChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions);
-    const selectedValues = selectedOptions.map(option => option.value);
-    setUsuariosSeleccionados(selectedValues);
-  };
-
-  return (
-    <div className="container mt-4">
-      <h2>Asignar Encuesta</h2>
-      {message && <div className="alert alert-info">{message}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="encuestaId" className="form-label">Seleccionar Encuesta:</label>
-          <select
-            id="encuestaId"
-            value={encuestaId}
-            onChange={(e) => setEncuestaId(e.target.value)}
-            className="form-select"
-            required
-          >
-            <option value="">Selecciona una encuesta</option>
-            {encuestas.map((encuesta) => (
-              <option key={encuesta.id_encuesta} value={encuesta.id_encuesta}>
-                {encuesta.titulo}
-              </option>
-            ))}
-          </select>
+    return (
+        <div className="container mt-5">
+            <h2 className="text-center">Asignar Encuesta</h2>
+            <form className="mx-auto" style={{ maxWidth: '500px' }}>
+                <div className="form-group mb-3">
+                    <label htmlFor="encuestaId">Seleccionar Encuesta</label>
+                    <select
+                        className="form-select"
+                        id="encuestaId"
+                        value={encuestaId}
+                        onChange={(e) => setEncuestaId(e.target.value)}
+                    >
+                        <option value="">Seleccione una encuesta</option>
+                        {encuestas.map((encuesta) => (
+                            <option key={encuesta.id_encuesta} value={encuesta.id_encuesta}>
+                                {encuesta.titulo}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="form-group mb-3">
+                    <label>Seleccionar Usuarios</label>
+                    {usuarios.map((usuario) => (
+                        <div key={usuario.rut} className="form-check">
+                            <input
+                                type="checkbox"
+                                className="form-check-input"
+                                value={usuario.rut}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setUsuarioIds([...usuarioIds, usuario.rut]);
+                                    } else {
+                                        setUsuarioIds(usuarioIds.filter(id => id !== usuario.rut));
+                                    }
+                                }}
+                            />
+                            <label className="form-check-label">
+                                {usuario.nombre} {usuario.apellido_paterno}
+                            </label>
+                        </div>
+                    ))}
+                </div>
+                <div className="form-group mb-3">
+                    <label>O Seleccionar Área</label>
+                    <select className="form-select" onChange={(e) => setAreaId(e.target.value)}>
+                        <option value="">Seleccionar Área</option>
+                        {areas.map((area) => (
+                            <option key={area.id_area} value={area.id_area}>
+                                {area.nombre_area}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <button type="button" className="btn btn-primary w-100" onClick={handleAsignar}>
+                    Asignar Encuesta
+                </button>
+            </form>
         </div>
-
-        <div className="mb-3">
-          <label htmlFor="tipoAsignacion" className="form-label">Asignar a:</label>
-          <select
-            id="tipoAsignacion"
-            value={tipoAsignacion}
-            onChange={(e) => setTipoAsignacion(e.target.value)}
-            className="form-select"
-          >
-            <option value="usuarios">Usuarios específicos</option>
-            <option value="area">Todos los usuarios del área</option>
-          </select>
-        </div>
-
-        {tipoAsignacion === 'usuarios' ? (
-          <div className="mb-3">
-            <label htmlFor="usuarioId" className="form-label">Seleccionar Usuarios:</label>
-            <select
-              id="usuarioId"
-              multiple
-              value={usuariosSeleccionados}
-              onChange={handleUsuarioChange}
-              className="form-select"
-              required
-            >
-              {usuarios.map((usuario) => (
-                <option key={usuario.rut} value={usuario.rut}>
-                  {usuario.nombre} {usuario.apellido_paterno} - {usuario.rut}
-                </option>
-              ))}
-            </select>
-            <small className="form-text text-muted">Mantén presionado Ctrl (Windows) o Cmd (Mac) para seleccionar varios usuarios.</small>
-          </div>
-        ) : (
-          <div className="mb-3">
-            <label htmlFor="areaId" className="form-label">Seleccionar Área:</label>
-            <select
-              id="areaId"
-              value={areaId}
-              onChange={(e) => setAreaId(e.target.value)}
-              className="form-select"
-              required
-            >
-              <option value="">Selecciona un área</option>
-              {areas.map((area) => (
-                <option key={area.id_area} value={area.id_area}>
-                  {area.nombre_area}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <button type="submit" className="btn btn-primary">
-          Asignar Encuesta
-        </button>
-      </form>
-    </div>
-  );
+    );
 };
 
 export default AsignarEncuestas;

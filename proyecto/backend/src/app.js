@@ -29,7 +29,7 @@ app.use('/api/areas', areaRoutes);
 app.use('/api/preguntas', preguntaRoutes);
 
 //app.use('/api/auth', usuarioRoutes);
-app.use('/api/encuestas-asignadas', encuestaAsignadaRoutes);
+app.use('/api/encuestasAsignada', encuestaAsignadaRoutes);
 
 const PORT = process.env.PORT || 4000; // Cambia esto a 4000
 app.listen(PORT, () => {

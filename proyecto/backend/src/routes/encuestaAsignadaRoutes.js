@@ -1,10 +1,11 @@
 // src/routes/encuestaAsignadaRoutes.js
-import { Router } from 'express';
-import { asignarEncuestaAUsuarios, asignarEncuestaAArea } from '../controllers/encuestaAsignadaController.js';
+import express from 'express';
+import { asignarEncuesta, obtenerEncuestasAsignadas } from '../controllers/encuestaAsignadaController.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
-const router = Router();
+const router = express.Router();
 
-router.post('/usuarios', asignarEncuestaAUsuarios); // Asignar encuesta a varios usuarios
-router.post('/area', asignarEncuestaAArea); // Asignar encuesta a un área completa
+router.post('/asignar', asignarEncuesta);
+router.get('/misEncuestas', authMiddleware, obtenerEncuestasAsignadas);
 
 export default router;
