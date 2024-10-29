@@ -94,3 +94,45 @@ export const obtenerEncuestaPorId = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener la encuesta', details: error.message });
   }
 };
+
+export const obtenerDetallesEncuesta = async (req, res) => {
+  const { encuestaId } = req.params;
+
+  try {
+      const encuesta = await prisma.encuesta.findUnique({
+          where: { id_encuesta: parseInt(encuestaId) },
+          include: {
+              preguntas: {
+                  include: {
+                      respuestas: {
+                          include: {
+                              usuario: {
+                                  select: {
+                                      rut: true,
+                                      nombre: true,
+                                      apellido_paterno: true,
+                                      apellido_materno: true
+                                  }
+                              },
+                              opcion: {
+                                  select: {
+                                      texto_opcion: true
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      });
+
+      if (!encuesta) {
+          return res.status(404).json({ error: 'Encuesta no encontrada' });
+      }
+
+      res.json(encuesta);
+  } catch (error) {
+      console.error('Error al obtener detalles de la encuesta:', error);
+      res.status(500).json({ error: 'Error al obtener detalles de la encuesta', details: error.message });
+  }
+};
