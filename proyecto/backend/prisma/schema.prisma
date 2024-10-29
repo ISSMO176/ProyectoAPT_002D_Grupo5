@@ -144,14 +144,16 @@ model OpcionRespuesta {
 }
 
 model Respuesta {
-  texto_respuesta     String?
-  fecha_respuesta     DateTime
-  usuarioId           String
-  usuario             Usuario         @relation(fields: [usuarioId], references: [rut])
-  opcionId            Int
-  opcion              OpcionRespuesta @relation(fields: [opcionId], references: [id_opcion])
-  Pregunta            Pregunta?       @relation(fields: [preguntaId_pregunta], references: [id_pregunta])
+  id_respuesta       Int              @id @default(autoincrement()) 
+  texto_respuesta    String?
+  fecha_respuesta    DateTime
+  usuarioId          String
+  usuario            Usuario          @relation(fields: [usuarioId], references: [rut])
+  opcionId           Int?
+  opcion             OpcionRespuesta? @relation(fields: [opcionId], references: [id_opcion])
+  Pregunta           Pregunta?        @relation(fields: [preguntaId_pregunta], references: [id_pregunta])
   preguntaId_pregunta Int?
 
-  @@id([usuarioId, opcionId])
+  
+  @@unique([usuarioId, preguntaId_pregunta])
 }

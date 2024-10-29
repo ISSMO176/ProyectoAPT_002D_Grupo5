@@ -7,7 +7,7 @@ const MisEncuestas = () => {
     const [encuestas, setEncuestas] = useState([]);
 
     useEffect(() => {
-        const fetchEncuestas = async () => {
+        const fetchEncuestasPendientes = async () => {
             const token = localStorage.getItem('token');
             try {
                 const response = await axios.get('http://localhost:4000/api/encuestasAsignada/misEncuestas', {
@@ -15,20 +15,26 @@ const MisEncuestas = () => {
                 });
                 setEncuestas(response.data);
             } catch (error) {
-                console.error('Error al cargar encuestas', error);
+                console.error('Error al obtener encuestas:', error);
+                alert('Error al obtener encuestas asignadas.');
             }
         };
-        fetchEncuestas();
+
+        fetchEncuestasPendientes();
     }, []);
+
+    if (encuestas.length === 0) {
+        return <p>No tienes encuestas pendientes para responder.</p>;
+    }
 
     return (
         <div className="container mt-5">
-            <h2 className="text-center">Mis Encuestas Asignadas</h2>
+            <h2 className="text-center">Mis Encuestas Pendientes</h2>
             <ul className="list-group">
-                {encuestas.map(encuesta => (
-                    <li key={encuesta.id_asignacion} className="list-group-item d-flex justify-content-between align-items-center">
-                        {encuesta.encuesta.titulo}
-                        <Link to={`/responderEncuesta/${encuesta.encuestaId}`} className="btn btn-primary btn-sm">
+                {encuestas.map((encuestaAsignada) => (
+                    <li key={encuestaAsignada.id_asignacion} className="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{encuestaAsignada.encuesta.titulo}</span>
+                        <Link to={`/responderEncuesta/${encuestaAsignada.encuestaId}`} className="btn btn-primary btn-sm">
                             Responder
                         </Link>
                     </li>

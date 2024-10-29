@@ -33,8 +33,12 @@ const ResponderEncuesta = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
+        
+        // Debug: Mostrar los datos que se van a enviar
+        console.log("Datos enviados:", { encuestaId, respuestas });
+
         try {
-            await axios.post(`http://localhost:4000/api/respuestas`, {
+            const response = await axios.post(`http://localhost:4000/api/respuestas`, {
                 encuestaId: parseInt(encuestaId),
                 respuestas
             }, {
@@ -43,8 +47,12 @@ const ResponderEncuesta = () => {
             alert('Respuestas enviadas correctamente');
             navigate('/misEncuestas');
         } catch (error) {
-            console.error('Error al enviar respuestas:', error);
-            alert('Error al enviar respuestas');
+            if (error.response && error.response.status === 400) {
+                alert(error.response.data.error || 'Error al enviar respuestas');
+            } else {
+                console.error('Error al enviar respuestas:', error);
+                alert('Error al enviar respuestas');
+            }
         }
     };
 
@@ -64,7 +72,7 @@ const ResponderEncuesta = () => {
                         ) : (
                             <select
                                 className="form-select"
-                                onChange={(e) => handleChange(pregunta.id_pregunta, e.target.value)}
+                                onChange={(e) => handleChange(pregunta.id_pregunta, parseInt(e.target.value))}
                             >
                                 <option value="">Seleccione una opción</option>
                                 {pregunta.opciones.map((opcion) => (

@@ -49,16 +49,23 @@ export const asignarEncuesta = async (req, res) => {
 };
 
 export const obtenerEncuestasAsignadas = async (req, res) => {
-    const { rut } = req.user;
+    const usuarioId = req.user.rut;
 
     try {
-        const encuestas = await prisma.encuestaAsignada.findMany({
-            where: { usuarioId: rut },
-            include: { encuesta: true }
+        const encuestasPendientes = await prisma.encuestaAsignada.findMany({
+            where: {
+                usuarioId,
+                estado: "pendiente"
+            },
+            include: {
+                encuesta: true
+            }
         });
-        res.json(encuestas);
+
+        res.json(encuestasPendientes);
     } catch (error) {
-        res.status(500).json({ error: 'Error al obtener las encuestas asignadas' });
+        console.error('Error al obtener encuestas asignadas:', error);
+        res.status(500).json({ error: 'Error al obtener encuestas asignadas', details: error.message });
     }
 };
 
