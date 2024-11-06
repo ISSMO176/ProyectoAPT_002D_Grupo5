@@ -7,11 +7,14 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "setup-env": "cp .env.example .env || copy .env.example .env",
+    "setup": "npm run setup-env --prefix frontend/app && npm run setup-env --prefix backend && npm install --prefix frontend/app && npm install --prefix backend"
   },
   "dependencies": {
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "proyecto": "file:../..",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2"

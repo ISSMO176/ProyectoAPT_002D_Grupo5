@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "setup": "npx prisma migrate deploy && npx prisma generate",
+    "setup": "npm run env-setup && npm install && npx prisma migrate deploy && npx prisma generate && node src/app.js",
+    "env-setup": "cp .env.example .env || echo '.env ya existe'",
     "start": "npm run setup && node src/app.js"
   },
   "keywords": [],
@@ -13,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "backend": "file:",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -23,6 +25,7 @@
     "pg": "^8.13.0",
     "pg-hstore": "^2.3.4",
     "prisma": "^5.22.0",
+    "proyecto": "file:..",
     "sequelize": "^6.37.4"
   },
   "description": "",
