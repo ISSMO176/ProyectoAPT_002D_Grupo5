@@ -134,17 +134,21 @@ CREATE TABLE "OpcionRespuesta" (
 
 -- CreateTable
 CREATE TABLE "Respuesta" (
+    "id_respuesta" SERIAL NOT NULL,
     "texto_respuesta" TEXT,
     "fecha_respuesta" TIMESTAMP(3) NOT NULL,
     "usuarioId" TEXT NOT NULL,
-    "opcionId" INTEGER NOT NULL,
+    "opcionId" INTEGER,
     "preguntaId_pregunta" INTEGER,
 
-    CONSTRAINT "Respuesta_pkey" PRIMARY KEY ("usuarioId","opcionId")
+    CONSTRAINT "Respuesta_pkey" PRIMARY KEY ("id_respuesta")
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Usuario_correo_key" ON "Usuario"("correo");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Respuesta_usuarioId_preguntaId_pregunta_key" ON "Respuesta"("usuarioId", "preguntaId_pregunta");
 
 -- AddForeignKey
 ALTER TABLE "Modulo" ADD CONSTRAINT "Modulo_cursoId_fkey" FOREIGN KEY ("cursoId") REFERENCES "CursoCapacitacion"("id_curso") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -189,7 +193,7 @@ ALTER TABLE "OpcionRespuesta" ADD CONSTRAINT "OpcionRespuesta_preguntaId_fkey" F
 ALTER TABLE "Respuesta" ADD CONSTRAINT "Respuesta_usuarioId_fkey" FOREIGN KEY ("usuarioId") REFERENCES "Usuario"("rut") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Respuesta" ADD CONSTRAINT "Respuesta_opcionId_fkey" FOREIGN KEY ("opcionId") REFERENCES "OpcionRespuesta"("id_opcion") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Respuesta" ADD CONSTRAINT "Respuesta_opcionId_fkey" FOREIGN KEY ("opcionId") REFERENCES "OpcionRespuesta"("id_opcion") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Respuesta" ADD CONSTRAINT "Respuesta_preguntaId_pregunta_fkey" FOREIGN KEY ("preguntaId_pregunta") REFERENCES "Pregunta"("id_pregunta") ON DELETE SET NULL ON UPDATE CASCADE;
