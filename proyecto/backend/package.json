@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "setup": "npm run env-setup && npm install && npx prisma migrate deploy && npx prisma generate && node src/app.js",
-    "env-setup": "cp .env.example .env || echo '.env ya existe'",
+    "env-setup": "copy .env.example .env > nul || echo .env ya existe",
     "start": "npm run setup && node src/app.js"
   },
   "keywords": [],
