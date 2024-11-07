@@ -1,11 +1,17 @@
 // src/components/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const [encuestas, setEncuestas] = useState([]);
     const [selectedEncuesta, setSelectedEncuesta] = useState(null);
     const [detallesEncuesta, setDetallesEncuesta] = useState(null);
+    const navigate = useNavigate();
+
+    const handleVerEstadisticas = (encuestaId) => {
+        navigate(`/estadisticas-encuesta/${encuestaId}`);
+    };
 
     useEffect(() => {
         const fetchEncuestas = async () => {
@@ -59,6 +65,12 @@ const Dashboard = () => {
             {detallesEncuesta && (
                 <div className="mt-4">
                     <h4>Detalles de la Encuesta: {detallesEncuesta.titulo}</h4>
+                    <button
+                        className="btn btn-primary mb-3"
+                        onClick={() => handleVerEstadisticas(selectedEncuesta)}
+                    >
+                        Ver Estadísticas
+                    </button>
                     <table className="table table-bordered">
                         <thead>
                             <tr>

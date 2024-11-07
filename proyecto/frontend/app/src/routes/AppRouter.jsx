@@ -14,8 +14,9 @@ import CrearEncuesta from '../components/CrearEncuesta';
 import ModificarEncuesta from '../components/ModificarEncuesta';
 import Roles from '../components/Roles';
 import AgregarPreguntasVista from '../components/AgregarPreguntasVista';
-import Areas from '../components/Areas'; // Importar el componente Areas
+import Areas from '../components/Areas'; 
 import ResponderEncuesta from '../components/ResponderEncuesta';
+import EstadisticasEncuesta from '../components/EstadisticasEncuesta';
 
 // import { isAuthenticated } from '../services/authService'; // Servicio para verificar autenticación
 // const PrivateRoute = ({ children }) => {
@@ -58,6 +59,7 @@ const AppRouter = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/agregar-preguntas/:id" element={<AgregarPreguntasVista />} />
       <Route path="/responderEncuesta/:encuestaId" element={<ResponderEncuesta />} />
+      <Route path="/estadisticas-encuesta/:encuestaId" element={<EstadisticasEncuesta />} />
     </Routes>
   );
 };

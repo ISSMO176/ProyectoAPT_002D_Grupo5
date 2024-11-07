@@ -7,6 +7,8 @@ import areaRoutes from './routes/areaRoutes.js';
 import preguntaRoutes from './routes/preguntaRoutes.js';
 import encuestaAsignadaRoutes from './routes/encuestaAsignadaRoutes.js';
 import respuestaRoutes from './routes/respuestaRoutes.js';
+import statsRoutes from './routes/statsRoutes.js';
+
 const app = express();
 
 // Configurar CORS
@@ -15,25 +17,19 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-
 app.use(express.json());
-
 // Rutas para encuestas
 app.use('/api/encuestas', encuestaRoutes); // Prefijo específico para encuestas
 // Rutas para usuarios
 app.use('/api/usuarios', usuarioRoutes); // Prefijo específico para usuarios
 // Rutas para roles
 app.use('/api/roles', rolRoutes);
-
 app.use('/api/areas', areaRoutes);
-
 app.use('/api/preguntas', preguntaRoutes);
-
 //app.use('/api/auth', usuarioRoutes);
 app.use('/api/encuestasAsignada', encuestaAsignadaRoutes);
-
 app.use('/api/respuestas', respuestaRoutes);
-
+app.use('/api/stats', statsRoutes); // Nueva ruta para estadísticas
 const PORT = process.env.PORT || 4000; // Cambia esto a 4000
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
