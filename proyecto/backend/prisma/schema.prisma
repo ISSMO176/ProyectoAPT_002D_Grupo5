@@ -150,7 +150,5 @@ model Respuesta {
   opcion             OpcionRespuesta? @relation(fields: [opcionId], references: [id_opcion])
   Pregunta           Pregunta?        @relation(fields: [preguntaId_pregunta], references: [id_pregunta])
   preguntaId_pregunta Int?
-
-  
   @@unique([usuarioId, preguntaId_pregunta])
 }

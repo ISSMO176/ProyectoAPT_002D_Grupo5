@@ -59,7 +59,7 @@ const AppRouter = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/agregar-preguntas/:id" element={<AgregarPreguntasVista />} />
       <Route path="/responderEncuesta/:encuestaId" element={<ResponderEncuesta />} />
-      <Route path="/estadisticas-encuesta/:encuestaId" element={<EstadisticasEncuesta />} />
+      <Route path="/estadisticas-encuesta/:encuestaId/pregunta/:preguntaId" element={<EstadisticasEncuesta />} />
     </Routes>
   );
 };

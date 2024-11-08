@@ -13,7 +13,7 @@ const app = express();
 
 // Configurar CORS
 app.use(cors({
-  origin: 'http://localhost:5173', // Cambia esto si tu frontend está en otro dominio o puerto
+  origin: 'http://localhost:5173',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));

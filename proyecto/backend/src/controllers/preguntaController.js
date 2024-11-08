@@ -30,7 +30,6 @@ export const crearPregunta = async (req, res) => {
   }
 };
 
-// Obtener todas las preguntas de una encuesta
 export const obtenerPreguntasPorEncuesta = async (req, res) => {
   const { encuestaId } = req.params;
 
@@ -82,10 +81,7 @@ export const eliminarPregunta = async (req, res) => {
         where: { id_pregunta: parseInt(id) },
         data: { texto_pregunta, tipo_respuesta }
       });
-  
-      // Luego, actualizamos las opciones (eliminamos las anteriores y creamos nuevas)
       if (tipo_respuesta === 'multiple' && opciones && opciones.length > 0) {
-        // Eliminar opciones existentes
         await prisma.opcionRespuesta.deleteMany({
           where: { preguntaId: parseInt(id) }
         });

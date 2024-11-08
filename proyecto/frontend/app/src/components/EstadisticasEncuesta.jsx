@@ -1,45 +1,86 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Bar } from 'react-chartjs-2';
+import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { CircularProgress } from '@mui/material';
+import { useParams } from 'react-router-dom';
 
-const EstadisticasEncuesta = ({ encuestaId }) => {
-    const [estadisticas, setEstadisticas] = useState(null);
+const EstadisticasEncuesta = () => {
+    const { encuestaId, preguntaId } = useParams(); // Obteniendo los parámetros de la URL
+    const [estadisticas, setEstadisticas] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log("encuestaId:", encuestaId, "preguntaId:", preguntaId);
+
+        if (!encuestaId || !preguntaId) {
+            console.error("Faltan los parámetros de encuestaId o preguntaId.");
+            setLoading(false);
+            return;
+        }
+
         const fetchEstadisticas = async () => {
-            const token = localStorage.getItem('token');
             try {
-                const response = await axios.get(`http://localhost:4000/api/encuestas/${encuestaId}/estadisticas`, {
+                const token = localStorage.getItem('token');
+                const encuestaIdNum = parseInt(encuestaId);
+                const preguntaIdNum = parseInt(preguntaId);
+
+                if (!encuestaIdNum || !preguntaIdNum) {
+                    console.error("Los parámetros de encuestaId o preguntaId no son válidos.");
+                    setLoading(false);
+                    return;
+                }
+
+                const response = await axios.get(`http://localhost:4000/api/respuestas/${encuestaIdNum}/pregunta/${preguntaIdNum}/estadisticas`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setEstadisticas(response.data);
+                setLoading(false);
             } catch (error) {
                 console.error('Error al obtener estadísticas:', error);
-                alert('Error al obtener estadísticas');
+                setLoading(false);
+                alert("No se pudieron cargar las estadísticas. Revisa los parámetros e inténtalo de nuevo.");
             }
         };
 
         fetchEstadisticas();
-    }, [encuestaId]);
+    }, [encuestaId, preguntaId]);
 
-    if (!estadisticas) return <p>Cargando estadísticas...</p>;
+    if (loading) {
+        return <CircularProgress />;
+    }
 
-    // Configuración del gráfico de barras
-    const data = {
-        labels: estadisticas.preguntas.map((pregunta) => pregunta.texto_pregunta),
-        datasets: estadisticas.preguntas.map((pregunta, index) => ({
-            label: `Pregunta ${index + 1}`,
-            data: pregunta.opciones.map((opcion) => opcion.porcentaje),
-            backgroundColor: `rgba(${(index + 1) * 40}, 99, 132, 0.6)`,
-        })),
-    };
+    if (!estadisticas || estadisticas.length === 0) {
+        return <div>No hay datos para mostrar</div>;
+    }
+
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF5733'];
+    const data = estadisticas.map((stat, index) => ({
+        name: stat.opcion,
+        value: stat.respuestas,
+        color: COLORS[index % COLORS.length],
+    }));
 
     return (
-        <div className="container mt-5">
-            <h2 className="text-center">Estadísticas de la Encuesta</h2>
-            <Bar data={data} />
+        <div style={{ width: '50%', margin: '0 auto' }}>
+            <h2>Estadísticas de la Pregunta {preguntaId}</h2>
+            <PieChart width={400} height={400}>
+                <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={150}
+                    dataKey="value"
+                >
+                    {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+            </PieChart>
         </div>
     );
 };
-
 export default EstadisticasEncuesta;
