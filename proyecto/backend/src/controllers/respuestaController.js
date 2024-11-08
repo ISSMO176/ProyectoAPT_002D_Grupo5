@@ -60,50 +60,25 @@ export const guardarRespuestas = async (req, res) => {
 };
 
 export const obtenerEstadisticasRespuestas = async (req, res) => {
-    const { encuestaId, preguntaId } = req.params;
-    if (!encuestaId || isNaN(encuestaId) || !preguntaId || isNaN(preguntaId)) {
-        return res.status(400).json({ error: 'Faltan los parámetros de encuestaId o preguntaId, o no son válidos' });
-    }
-    try {
-        const parsedEncuestaId = parseInt(encuestaId);
-        const parsedPreguntaId = parseInt(preguntaId);
-        const opciones = await prisma.opcionRespuesta.findMany({
-            where: {
-                preguntaId: parsedPreguntaId,
-            },
-            select: {
-                id_opcion: true,
-                texto_opcion: true,
-            },
-        });
-        if (!opciones || opciones.length === 0) {
-            return res.status(404).json({ error: 'No se encontraron opciones para esta pregunta' });
-        }
-        const conteos = await prisma.respuesta.groupBy({
-            by: ['opcionId'],
-            where: {
-                preguntaId: parsedPreguntaId,
-                Pregunta: {
-                    encuestaId: parsedEncuestaId,
-                },
-            },
-            _count: {
-                opcionId: true,
-            },
-        });
-        if (!conteos || conteos.length === 0) {
-            return res.status(404).json({ error: 'No se encontraron respuestas para esta pregunta' });
-        }
-        const resultados = opciones.map(opcion => {
-            const conteo = conteos.find(c => c.opcionId === opcion.id_opcion);
-            return {
-                opcion: opcion.texto_opcion,
-                respuestas: conteo ? conteo._count.opcionId : 0,
-            };
-        });
-        res.json(resultados);
-    } catch (error) {
-        console.error('Error al obtener estadísticas de respuestas:', error);
-        res.status(500).json({ error: 'Error al obtener estadísticas de respuestas', details: error.message });
-    }
+  try {
+    const { encuestaId } = req.params;
+
+    // Obtener estadísticas agrupadas por opcionId para todas las preguntas de una encuesta
+    const estadisticas = await prisma.respuesta.groupBy({
+      by: ['opcionId'],
+      where: {
+        Pregunta: {
+          encuestaId: parseInt(encuestaId),
+        },
+      },
+      _count: {
+        opcionId: true,
+      },
+    });
+
+    res.json(estadisticas);
+  } catch (error) {
+    console.error("Error al obtener estadísticas de respuestas:", error);
+    res.status(500).json({ error: "Error al obtener estadísticas de respuestas" });
+  }
 };

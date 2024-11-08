@@ -3,37 +3,47 @@ const prisma = new PrismaClient();
 
 
 export const getStatistics = async (req, res) => {
-    const { encuestaId, preguntaId } = req.params;
+    const { encuestaId } = req.params;
 
     try {
-        console.log("preguntaId:", preguntaId);
-        // Obtiene las opciones
-        const opciones = await prisma.opcionRespuesta.findMany({
-            where: {
-                preguntaId: parseInt(preguntaId),
-            },
-            select: {
-                id_opcion: true,
-                texto_opcion: true,
-            },
-        });
-        console.log('Opciones:', opciones); // Verifica el resultado de la consulta.
-        // Obtiene los conteos de respuestas agrupados por opción
-        const conteos = await prisma.respuesta.groupBy({
-            by: ['opcionId'],
-            where: {
-                preguntaId_pregunta: parseInt(preguntaId),
-                Pregunta: {
-                    encuestaId: parseInt(encuestaId),
+        const preguntas = await prisma.pregunta.findMany({
+            where: { encuestaId: parseInt(encuestaId) },
+            include: {
+                opciones: {
+                    select: {
+                        id_opcion: true,
+                        texto_opcion: true,
+                    },
                 },
-            },
-            _count: {
-                opcionId: true,
             },
         });
 
-        // Devuelve las estadísticas (opciones + conteos)
-        res.json({ opciones, conteos });
+        const estadisticas = await Promise.all(preguntas.map(async (pregunta) => {
+            const conteos = await prisma.respuesta.groupBy({
+                by: ['opcionId'],
+                where: {
+                    preguntaId_pregunta: pregunta.id_pregunta,
+                },
+                _count: {
+                    opcionId: true,
+                },
+            });
+
+            const opcionesConConteo = pregunta.opciones.map(opcion => {
+                const conteo = conteos.find(c => c.opcionId === opcion.id_opcion);
+                return {
+                    texto_opcion: opcion.texto_opcion,
+                    respuestas: conteo ? conteo._count.opcionId : 0,
+                };
+            });
+
+            return {
+                texto_pregunta: pregunta.texto_pregunta,
+                opciones: opcionesConConteo,
+            };
+        }));
+
+        res.json(estadisticas);
 
     } catch (error) {
         console.error('Error al obtener estadísticas:', error);

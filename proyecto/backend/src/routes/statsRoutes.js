@@ -3,6 +3,6 @@ import { getStatistics } from '../controllers/statsController.js';
 
 const router = express.Router();
 
-router.get('/:encuestaId/pregunta/:preguntaId/estadisticas', getStatistics);
+router.get('/:encuestaId/estadisticas', getStatistics);
 
 export default router;
