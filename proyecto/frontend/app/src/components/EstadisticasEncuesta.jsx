@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Text, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { CircularProgress, IconButton } from '@mui/material';
+import { CircularProgress, IconButton, Tooltip as MuiTooltip } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { BarChart as BarChartIcon, PieChart as PieChartIcon } from '@mui/icons-material';
 
@@ -67,9 +67,16 @@ const EstadisticasEncuesta = () => {
         <div style={{ width: '90%', margin: '0 auto', padding: '20px', textAlign: 'center' }}>
             <h2>Estadísticas de la Encuesta {encuestaId}</h2>
 
-            <IconButton onClick={handleToggleChart} color="primary" style={{ marginBottom: '20px' }}>
-                {isPieChart ? <BarChartIcon /> : <PieChartIcon />}
-            </IconButton>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                <MuiTooltip title={isPieChart ? "Cambiar a gráfico de barras" : "Cambiar a gráfico circular"}>
+                    <IconButton onClick={handleToggleChart} color="primary">
+                        {isPieChart ? <BarChartIcon /> : <PieChartIcon />}
+                    </IconButton>
+                </MuiTooltip>
+                <span style={{ fontSize: '0.9rem', color: '#333', marginLeft: '8px' }}>
+                    {isPieChart ? "Cambiar a gráfico de barras" : "Cambiar a gráfico circular"}
+                </span>
+            </div>
 
             {estadisticas.map((pregunta, index) => (
                 <div key={index} style={{ marginBottom: '2rem', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
