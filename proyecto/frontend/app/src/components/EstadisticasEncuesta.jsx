@@ -22,8 +22,12 @@ const EstadisticasEncuesta = () => {
                 const response = await axios.get(`http://localhost:4000/api/stats/${encuestaId}/estadisticas`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
-                setEstadisticas(response.data);
+
+                console.log("Datos recibidos:", response.data); 
+                const estadisticasFiltradas = response.data.filter(
+                    pregunta => pregunta.opciones && pregunta.opciones.length > 0
+                );
+                setEstadisticas(estadisticasFiltradas);
                 setLoading(false);
             } catch (error) {
                 console.error('Error al obtener estadísticas:', error);
@@ -77,4 +81,5 @@ const EstadisticasEncuesta = () => {
         </div>
     );
 };
+
 export default EstadisticasEncuesta;

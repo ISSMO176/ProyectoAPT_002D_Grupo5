@@ -28,7 +28,7 @@ export const getStatistics = async (req, res) => {
                     opcionId: true,
                 },
             });
-
+        
             const opcionesConConteo = pregunta.opciones.map(opcion => {
                 const conteo = conteos.find(c => c.opcionId === opcion.id_opcion);
                 return {
@@ -36,10 +36,11 @@ export const getStatistics = async (req, res) => {
                     respuestas: conteo ? conteo._count.opcionId : 0,
                 };
             });
-
+        
             return {
                 texto_pregunta: pregunta.texto_pregunta,
                 opciones: opcionesConConteo,
+                tipo: pregunta.tipo || 'multiple' // Ajusta aquí el valor según tu lógica
             };
         }));
 
