@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
-import { CircularProgress } from '@mui/material';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Text, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { CircularProgress, IconButton } from '@mui/material';
 import { useParams } from 'react-router-dom';
+import { BarChart as BarChartIcon, PieChart as PieChartIcon } from '@mui/icons-material';
 
 const EstadisticasEncuesta = () => {
     const { encuestaId } = useParams();
     const [estadisticas, setEstadisticas] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isPieChart, setIsPieChart] = useState(true);
 
     useEffect(() => {
         if (!encuestaId) {
@@ -23,7 +25,6 @@ const EstadisticasEncuesta = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
-                console.log("Datos recibidos:", response.data); 
                 const estadisticasFiltradas = response.data.filter(
                     pregunta => pregunta.opciones && pregunta.opciones.length > 0
                 );
@@ -39,6 +40,10 @@ const EstadisticasEncuesta = () => {
         fetchEstadisticas();
     }, [encuestaId]);
 
+    const handleToggleChart = () => {
+        setIsPieChart(!isPieChart);
+    };
+
     if (loading) {
         return <CircularProgress />;
     }
@@ -49,33 +54,68 @@ const EstadisticasEncuesta = () => {
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF5733'];
 
+    const renderCustomizedLabel = ({ x, y, name, percent }) => {
+        const fontSize = name.length > 10 ? 12 : 14;
+        return (
+            <Text x={x} y={y} fontSize={fontSize} fill="#333" textAnchor="middle" dominantBaseline="central">
+                {`${name}: ${(percent * 100).toFixed(0)}%`}
+            </Text>
+        );
+    };
+
     return (
-        <div style={{ width: '80%', margin: '0 auto' }}>
+        <div style={{ width: '90%', margin: '0 auto', padding: '20px', textAlign: 'center' }}>
             <h2>Estadísticas de la Encuesta {encuestaId}</h2>
+
+            <IconButton onClick={handleToggleChart} color="primary" style={{ marginBottom: '20px' }}>
+                {isPieChart ? <BarChartIcon /> : <PieChartIcon />}
+            </IconButton>
+
             {estadisticas.map((pregunta, index) => (
-                <div key={index} style={{ marginBottom: '2rem' }}>
-                    <h3>{pregunta.texto_pregunta}</h3>
-                    <PieChart width={400} height={400}>
-                        <Pie
-                            data={pregunta.opciones.map((opcion, idx) => ({
-                                name: opcion.texto_opcion,
-                                value: opcion.respuestas,
-                                color: COLORS[idx % COLORS.length],
-                            }))}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={150}
-                            dataKey="value"
-                        >
-                            {pregunta.opciones.map((_, idx) => (
-                                <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
-                            ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                    </PieChart>
+                <div key={index} style={{ marginBottom: '2rem', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+                    <h3 style={{ fontSize: '1.5rem', color: '#333', marginBottom: '1rem' }}>{pregunta.texto_pregunta}</h3>
+                    
+                    <ResponsiveContainer width="100%" height={400}>
+                        {isPieChart ? (
+                            <PieChart>
+                                <Pie
+                                    data={pregunta.opciones.map((opcion, idx) => ({
+                                        name: opcion.texto_opcion,
+                                        value: opcion.respuestas,
+                                        color: COLORS[idx % COLORS.length],
+                                    }))}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={false}
+                                    label={renderCustomizedLabel}
+                                    outerRadius={160}
+                                    innerRadius={80}
+                                    dataKey="value"
+                                    isAnimationActive={true}
+                                >
+                                    {pregunta.opciones.map((_, idx) => (
+                                        <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                                <Legend verticalAlign="bottom" height={36} />
+                            </PieChart>
+                        ) : (
+                            <BarChart
+                                data={pregunta.opciones.map((opcion) => ({
+                                    name: opcion.texto_opcion,
+                                    value: opcion.respuestas,
+                                }))}
+                                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                                <YAxis />
+                                <Tooltip />
+                                <Bar dataKey="value" fill="#8884d8" />
+                            </BarChart>
+                        )}
+                    </ResponsiveContainer>
                 </div>
             ))}
         </div>
