@@ -1,4 +1,3 @@
-// src/components/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +6,7 @@ const Dashboard = () => {
     const [encuestas, setEncuestas] = useState([]);
     const [selectedEncuesta, setSelectedEncuesta] = useState(null);
     const [detallesEncuesta, setDetallesEncuesta] = useState(null);
+    const [porcentajeRespondidas, setPorcentajeRespondidas] = useState(0);
     const navigate = useNavigate();
 
     const handleVerEstadisticas = (encuestaId) => {
@@ -38,10 +38,36 @@ const Dashboard = () => {
             });
             setDetallesEncuesta(response.data);
             setSelectedEncuesta(encuestaId);
+            calcularPorcentajeRespondidas(response.data);
         } catch (error) {
             console.error('Error al obtener detalles de la encuesta:', error);
             alert('Error al obtener detalles de la encuesta');
         }
+    };
+
+    const calcularPorcentajeRespondidas = (encuestaDetalles) => {
+        if (!encuestaDetalles || !encuestaDetalles.preguntas.length) {
+            setPorcentajeRespondidas(0);
+            return;
+        }
+
+        // Contamos el número total de usuarios asignados a la encuesta
+        const totalUsuariosAsignados = encuestaDetalles.preguntas[0].respuestas.map(r => r.usuario.rut).filter((value, index, self) => self.indexOf(value) === index).length;
+
+        // Contamos los usuarios que han respondido al menos una pregunta
+        const usuariosConRespuestas = new Set();
+
+        encuestaDetalles.preguntas.forEach((pregunta) => {
+            pregunta.respuestas.forEach((respuesta) => {
+                if (respuesta.texto_respuesta || respuesta.opcion) {
+                    usuariosConRespuestas.add(respuesta.usuario.rut);
+                }
+            });
+        });
+
+        // Calculamos el porcentaje basado en los usuarios únicos que han respondido al menos una pregunta
+        const porcentaje = totalUsuariosAsignados > 0 ? (usuariosConRespuestas.size / totalUsuariosAsignados) * 100 : 0;
+        setPorcentajeRespondidas(porcentaje.toFixed(1));
     };
 
     return (
@@ -65,6 +91,7 @@ const Dashboard = () => {
             {detallesEncuesta && (
                 <div className="mt-4">
                     <h4>Detalles de la Encuesta: {detallesEncuesta.titulo}</h4>
+                    <p><strong>Porcentaje de encuestas respondidas:</strong> {porcentajeRespondidas}%</p>
                     <button
                         className="btn btn-primary mb-3"
                         onClick={() => handleVerEstadisticas(selectedEncuesta)}
