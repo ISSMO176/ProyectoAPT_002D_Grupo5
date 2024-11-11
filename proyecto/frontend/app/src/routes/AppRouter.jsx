@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import Navbar from '../components/navbar';
+import Footer from '../components/Footer';  // Asegúrate de tener el Footer importado
 import Login from '../components/Login';
 import Encuestas from '../components/Encuestas';
 import Perfil from '../components/Perfil';
@@ -14,18 +16,9 @@ import CrearEncuesta from '../components/CrearEncuesta';
 import ModificarEncuesta from '../components/ModificarEncuesta';
 import Roles from '../components/Roles';
 import AgregarPreguntasVista from '../components/AgregarPreguntasVista';
-import Areas from '../components/Areas'; 
+import Areas from '../components/Areas';
 import ResponderEncuesta from '../components/ResponderEncuesta';
 import EstadisticasEncuesta from '../components/EstadisticasEncuesta';
-// import { isAuthenticated } from '../services/authService'; // Servicio para verificar autenticación
-// const PrivateRoute = ({ children }) => {
-//   return isAuthenticated() ? children : <Navigate to="/login" />;
-// };
-
-// // Componente para rutas públicas (ejemplo: login)
-// const PublicRoute = ({ children }) => {
-//   return !isAuthenticated() ? children : <Navigate to="/dashboard" />;
-// };
 
 const AppRouter = () => {
   const location = useLocation();
@@ -41,24 +34,29 @@ const AppRouter = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/encuestas" element={<Encuestas />} />
-      <Route path="/misencuestas" element={<MisEncuestas />} />
-      <Route path="/perfil" element={<Perfil />} />
-      <Route path="/usuarios" element={<Usuarios />} />
-      <Route path="/preguntas" element={<Preguntas />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/encuestasignada" element={<Encuestasignada />} />
-      <Route path="/asignarencuestas" element={<AsignarEncuestas />} />
-      <Route path="/agregarpreguntas" element={<AgregarPreguntas />} />
-      <Route path="/crear-encuesta" element={<CrearEncuesta />} />
-      <Route path="/modificar-encuesta/:idEncuesta" element={<ModificarEncuesta />} />
-      <Route path="/roles" element={<Roles />} />
-      <Route path="/areas" element={<Areas />} />
+      {/* Ruta de login con Navbar solo cuando sea necesario */}
       <Route path="/login" element={<Login />} />
-      <Route path="/agregar-preguntas/:id" element={<AgregarPreguntasVista />} />
-      <Route path="/responderEncuesta/:encuestaId" element={<ResponderEncuesta />} />
-      <Route path="/estadisticas-encuesta/:encuestaId" element={<EstadisticasEncuesta />} />
+      
+      {/* Ruta por defecto que redirige al login */}
+      <Route path="/" element={<Navigate to="/login" />} />
+
+      {/* Rutas con Navbar y Footer */}
+      <Route path="/encuestas" element={<><Navbar /><Encuestas /><Footer /></>} />
+      <Route path="/misencuestas" element={<><Navbar /><MisEncuestas /><Footer /></>} />
+      <Route path="/perfil" element={<><Navbar /><Perfil /><Footer /></>} />
+      <Route path="/usuarios" element={<><Navbar /><Usuarios /><Footer /></>} />
+      <Route path="/preguntas" element={<><Navbar /><Preguntas /><Footer /></>} />
+      <Route path="/dashboard" element={<><Navbar /><Dashboard /><Footer /></>} />
+      <Route path="/encuestasignada" element={<><Navbar /><Encuestasignada /><Footer /></>} />
+      <Route path="/asignarencuestas" element={<><Navbar /><AsignarEncuestas /><Footer /></>} />
+      <Route path="/agregarpreguntas" element={<><Navbar /><AgregarPreguntas /><Footer /></>} />
+      <Route path="/crear-encuesta" element={<><Navbar /><CrearEncuesta /><Footer /></>} />
+      <Route path="/modificar-encuesta/:idEncuesta" element={<><Navbar /><ModificarEncuesta /><Footer /></>} />
+      <Route path="/roles" element={<><Navbar /><Roles /><Footer /></>} />
+      <Route path="/areas" element={<><Navbar /><Areas /><Footer /></>} />
+      <Route path="/agregar-preguntas/:id" element={<><Navbar /><AgregarPreguntasVista /><Footer /></>} />
+      <Route path="/responderEncuesta/:encuestaId" element={<><Navbar /><ResponderEncuesta /><Footer /></>} />
+      <Route path="/estadisticas-encuesta/:encuestaId" element={<><Navbar /><EstadisticasEncuesta /><Footer /></>} />
     </Routes>
   );
 };
