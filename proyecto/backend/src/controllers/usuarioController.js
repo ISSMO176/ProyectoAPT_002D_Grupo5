@@ -1,6 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import multer from 'multer';
+import xlsx from 'xlsx';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 const prisma = new PrismaClient();
 
@@ -148,7 +153,7 @@ export const actualizarPerfil = async (req, res) => {
 
   try {
     const usuarioActualizado = await prisma.usuario.update({
-      where: { id: usuarioId }, // Asegúrate de que 'id' es la clave primaria de usuario
+      where: { id: usuarioId }, 
       data: {
         nombre,
         correo,
@@ -159,5 +164,59 @@ export const actualizarPerfil = async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar perfil:', error);
     res.status(500).json({ error: 'Error al actualizar perfil', details: error.message });
+  }
+};
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.resolve(__dirname, '../../uploads'));
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+export const upload = multer({ storage });
+
+export const cargarUsuariosDesdeExcel = async (req, res) => {
+  const filePath = req.file.path;
+
+  try {
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet);
+
+    const usuarios = data.map((row) => ({
+      rut: row.rut,
+      nombre: row.nombre,
+      apellido_paterno: row.apellido_paterno,
+      apellido_materno: row.apellido_materno,
+      correo: row.correo,
+      contrasena: row.contrasena,
+      rolId: parseInt(row.rolId),
+      areaId_area: row.areaId_area ? parseInt(row.areaId_area) : null,
+    }));
+
+    for (const usuario of usuarios) {
+      usuario.contrasena = await bcrypt.hash(usuario.contrasena, 10);
+    }
+
+    const nuevosUsuarios = await prisma.usuario.createMany({
+      data: usuarios,
+      skipDuplicates: true,
+    });
+
+    res.status(201).json({ message: 'Usuarios creados correctamente', nuevosUsuarios });
+  } catch (error) {
+    console.error('Error al cargar usuarios desde Excel:', error);
+    res.status(500).json({ error: 'Error al cargar usuarios desde Excel' });
+  } finally {
+    fs.unlink(filePath, (err) => {
+      if (err) console.error('Error al eliminar el archivo:', err);
+    });
   }
 };
