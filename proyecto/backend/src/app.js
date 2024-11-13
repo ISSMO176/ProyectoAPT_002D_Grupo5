@@ -14,9 +14,13 @@ const app = express();
 // Configurar CORS
 app.use(cors({
   origin: 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: true, 
+  optionsSuccessStatus: 200,
 }));
+app.options('*', cors());
+
 app.use(express.json());
 // Rutas para encuestas
 app.use('/api/encuestas', encuestaRoutes); // Prefijo específico para encuestas

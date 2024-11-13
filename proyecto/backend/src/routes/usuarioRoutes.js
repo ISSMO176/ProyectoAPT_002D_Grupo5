@@ -7,7 +7,8 @@ import {
   eliminarUsuario,
   login, 
   cargarUsuariosDesdeExcel,
-   upload
+  upload,
+  cambiarEstadoUsuario
   // obtenerPerfil,
   // actualizarPerfil,
 } from '../controllers/usuarioController.js';
@@ -30,7 +31,7 @@ router.post('/login', login); // Agregar la ruta de login
 
 router.post('/cargar-excel', upload.single('file'), cargarUsuariosDesdeExcel);
 // router.get('/perfil', verificarToken, obtenerPerfil);
-
+router.patch('/:rut/cambiar-estado', cambiarEstadoUsuario);
 // Actualizar perfil del usuario autenticado
 // router.put('/perfil', verificarToken, actualizarPerfil);
 

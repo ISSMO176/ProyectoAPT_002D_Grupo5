@@ -10,26 +10,49 @@ import { fileURLToPath } from 'url';
 const prisma = new PrismaClient();
 
 
-// Método de login
-
 export const login = async (req, res) => {
   const { rut, contrasena } = req.body;
 
   try {
-      const usuario = await prisma.usuario.findUnique({ where: { rut } });
-      if (!usuario) return res.status(401).json({ error: 'Usuario no encontrado' });
+    const usuario = await prisma.usuario.findUnique({ where: { rut } });
 
-      const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
-      if (!contrasenaValida) return res.status(401).json({ error: 'Contraseña incorrecta' });
+    if (!usuario) {
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+    }
 
-      const token = jwt.sign({ rut: usuario.rut }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      res.json({ token });
+    if (!usuario.activo) {
+      return res.status(403).json({ error: 'Usuario deshabilitado. Contacta al administrador.' });
+    }
+
+    const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
+    if (!contrasenaValida) return res.status(401).json({ error: 'Contraseña incorrecta' });
+
+    const token = jwt.sign({ rut: usuario.rut }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
   } catch (error) {
-      res.status(500).json({ error: 'Error en el login' });
+    res.status(500).json({ error: 'Error en el login' });
   }
 };
 
-// Obtener todos los usuarios
+
+export const cambiarEstadoUsuario = async (req, res) => {
+  const { rut } = req.params;
+  const { activo } = req.body;
+  
+  console.log(`Cambiando estado de usuario con RUT ${rut} a ${activo}`); // Log para depuración
+
+  try {
+    const usuarioModificado = await prisma.usuario.update({
+      where: { rut },
+      data: { activo },
+    });
+    res.status(200).json(usuarioModificado);
+  } catch (error) {
+    console.error('Error al cambiar el estado del usuario:', error);
+    res.status(500).json({ error: 'Error al cambiar el estado del usuario' });
+  }
+};
+
 export const obtenerUsuarios = async (req, res) => {
   try {
     const usuarios = await prisma.usuario.findMany({

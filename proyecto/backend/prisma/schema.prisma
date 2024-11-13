@@ -67,6 +67,7 @@ model Usuario {
   cumplimiento_lecciones Cumplimiento_leccion[]
   Area                   Area?                  @relation(fields: [areaId_area], references: [id_area])
   areaId_area            Int?
+  activo                 Boolean                @default(true)
 }
 
 model CursoAsignado {

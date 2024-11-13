@@ -67,14 +67,17 @@ const Usuarios = () => {
     }
   };
 
-  const handleEliminarUsuario = async (rut) => {
+  const handleCambiarEstadoUsuario = async (usuario) => {
+    const nuevoEstado = !usuario.activo; // Cambia el estado actual
+  
     try {
-      await axios.delete(`http://localhost:4000/api/usuarios/${rut}`);
-      obtenerUsuarios();
+      await axios.patch(`http://localhost:4000/api/usuarios/${usuario.rut}/cambiar-estado`, { activo: nuevoEstado });
+      obtenerUsuarios(); // Refresca la lista de usuarios después de cambiar el estado
     } catch (error) {
-      console.error('Error al eliminar el usuario', error);
+      console.error('Error al cambiar el estado del usuario', error);
     }
   };
+  
 
   const handleCancelar = () => {
     setFormVisible(false);
@@ -140,7 +143,7 @@ const Usuarios = () => {
                     </div>
                     <div>
                       <button className="btn btn-primary me-2" onClick={() => handleModificarUsuario(usuario)}>Modificar</button>
-                      <button className="btn btn-danger" onClick={() => handleEliminarUsuario(usuario.rut)}>Eliminar</button>
+                      <button className={`btn ${usuario.activo ? 'btn-warning' : 'btn-success'}`} onClick={() => handleCambiarEstadoUsuario(usuario)}>{usuario.activo ? 'Deshabilitar' : 'Habilitar'}</button>
                     </div>
                   </div>
                 );
