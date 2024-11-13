@@ -56,7 +56,7 @@ model Usuario {
   rut                    String                 @id
   nombre                 String
   apellido_paterno       String
-  apellido_materno       String
+  apellido_materno       String?               // Hacer opcional
   correo                 String                 @unique
   contrasena             String
   rolId                  Int

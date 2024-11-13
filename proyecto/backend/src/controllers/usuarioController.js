@@ -50,7 +50,7 @@ export const crearUsuario = async (req, res) => {
   const { rut, nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
 
   // Validar que todos los campos estén presentes
-  if (!rut || !nombre || !apellido_paterno || !apellido_materno || !correo || !contrasena || !rolId || !areaId_area) {
+  if (!rut || !nombre || !apellido_paterno || !correo || !contrasena || !rolId || !areaId_area) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
@@ -82,7 +82,7 @@ export const modificarUsuario = async (req, res) => {
   const { nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
 
   // Validar que todos los campos estén presentes
-  if (!nombre || !apellido_paterno || !apellido_materno || !correo || !contrasena || !rolId || !areaId_area) {
+  if (!nombre || !apellido_paterno || !correo || !contrasena || !rolId || !areaId_area) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 

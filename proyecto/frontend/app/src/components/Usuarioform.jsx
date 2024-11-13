@@ -74,7 +74,7 @@ const UsuarioForm = ({ usuarioEditado, onSave, onCancel, roles, areas }) => {
       </div>
       <div className="mb-3">
         <label className="form-label">Apellido Materno</label>
-        <input type="text" className="form-control" value={apellido_materno} onChange={(e) => setApellidoMaterno(e.target.value)} required />
+        <input type="text" className="form-control" value={apellido_materno} onChange={(e) => setApellidoMaterno(e.target.value)}/>
       </div>
       <div className="mb-3">
         <label className="form-label">Correo</label>
