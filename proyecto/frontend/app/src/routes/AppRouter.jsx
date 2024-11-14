@@ -23,15 +23,6 @@ import EstadisticasEncuesta from '../components/EstadisticasEncuesta';
 const AppRouter = () => {
   const location = useLocation();
 
-  useEffect(() => {
-    if (location.pathname === '/login') {
-      document.body.className = 'light-theme login-page';
-    } else {
-      const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.body.className = isDarkMode ? 'dark-theme' : 'light-theme';
-    }
-  }, [location.pathname]);
-
   return (
     <Routes>
       {/* Ruta de login con Navbar solo cuando sea necesario */}
@@ -41,22 +32,22 @@ const AppRouter = () => {
       <Route path="/" element={<Navigate to="/login" />} />
 
       {/* Rutas con Navbar y Footer */}
-      <Route path="/encuestas" element={<><Navbar /><Encuestas /><Footer /></>} />
-      <Route path="/misencuestas" element={<><Navbar /><MisEncuestas /><Footer /></>} />
-      <Route path="/perfil" element={<><Navbar /><Perfil /><Footer /></>} />
-      <Route path="/usuarios" element={<><Navbar /><Usuarios /><Footer /></>} />
-      <Route path="/preguntas" element={<><Navbar /><Preguntas /><Footer /></>} />
-      <Route path="/dashboard" element={<><Navbar /><Dashboard /><Footer /></>} />
-      <Route path="/encuestasignada" element={<><Navbar /><Encuestasignada /><Footer /></>} />
-      <Route path="/asignarencuestas" element={<><Navbar /><AsignarEncuestas /><Footer /></>} />
-      <Route path="/agregarpreguntas" element={<><Navbar /><AgregarPreguntas /><Footer /></>} />
-      <Route path="/crear-encuesta" element={<><Navbar /><CrearEncuesta /><Footer /></>} />
-      <Route path="/modificar-encuesta/:idEncuesta" element={<><Navbar /><ModificarEncuesta /><Footer /></>} />
-      <Route path="/roles" element={<><Navbar /><Roles /><Footer /></>} />
-      <Route path="/areas" element={<><Navbar /><Areas /><Footer /></>} />
-      <Route path="/agregar-preguntas/:id" element={<><Navbar /><AgregarPreguntasVista /><Footer /></>} />
-      <Route path="/responderEncuesta/:encuestaId" element={<><Navbar /><ResponderEncuesta /><Footer /></>} />
-      <Route path="/estadisticas-encuesta/:encuestaId" element={<><Navbar /><EstadisticasEncuesta /><Footer /></>} />
+      <Route path="/encuestas" element={<><Navbar /><Encuestas /></>} />
+      <Route path="/misencuestas" element={<><Navbar /><MisEncuestas /></>} />
+      <Route path="/perfil" element={<><Navbar /><Perfil /></>} />
+      <Route path="/usuarios" element={<><Navbar /><Usuarios /></>} />
+      <Route path="/preguntas" element={<><Navbar /><Preguntas /></>} />
+      <Route path="/dashboard" element={<><Navbar /><Dashboard /></>} />
+      <Route path="/encuestasignada" element={<><Navbar /><Encuestasignada /></>} />
+      <Route path="/asignarencuestas" element={<><Navbar /><AsignarEncuestas /></>} />
+      <Route path="/agregarpreguntas" element={<><Navbar /><AgregarPreguntas /></>} />
+      <Route path="/crear-encuesta" element={<><Navbar /><CrearEncuesta /></>} />
+      <Route path="/modificar-encuesta/:idEncuesta" element={<><Navbar /><ModificarEncuesta /></>} />
+      <Route path="/roles" element={<><Navbar /><Roles /></>} />
+      <Route path="/areas" element={<><Navbar /><Areas /></>} />
+      <Route path="/agregar-preguntas/:id" element={<><Navbar /><AgregarPreguntasVista /></>} />
+      <Route path="/responderEncuesta/:encuestaId" element={<><Navbar /><ResponderEncuesta /></>} />
+      <Route path="/estadisticas-encuesta/:encuestaId" element={<><Navbar /><EstadisticasEncuesta /></>} />
     </Routes>
   );
 };
