@@ -9,8 +9,8 @@ const AsignarEncuestas = () => {
     const [usuariosSeleccionados, setUsuariosSeleccionados] = useState({});
     const [areas, setAreas] = useState([]);
     const [encuestas, setEncuestas] = useState([]);
-    const [searchTerm, setSearchTerm] = useState(''); // Nuevo estado para el término de búsqueda
-    const [seleccionarTodos, setSeleccionarTodos] = useState(false); // Nuevo estado para seleccionar/deseleccionar todos
+    const [searchTerm, setSearchTerm] = useState('');
+    const [seleccionarTodos, setSeleccionarTodos] = useState(false);
 
     useEffect(() => {
         const fetchUsuarios = async () => {
