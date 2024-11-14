@@ -1,10 +1,8 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ThemeContext } from '../context/ThemeContext'; // Importar el contexto del tema
 
 const Encuestas = () => {
-  const { isDarkMode } = useContext(ThemeContext); // Obtener el estado del tema
   const [encuestas, setEncuestas] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const encuestasPerPage = 6;
@@ -63,7 +61,7 @@ const Encuestas = () => {
   };
 
   return (
-    <div className={`container mt-4 bg-${isDarkMode ? 'dark' : 'light'} text-${isDarkMode ? 'light' : 'dark'}`}>
+    <div className="container mt-4 bg-light text-dark">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Gestión de Encuestas</h2>
         <button className="btn btn-success" onClick={handleCrearEncuesta}>
@@ -75,7 +73,7 @@ const Encuestas = () => {
         {currentEncuestas.length > 0 ? (
           currentEncuestas.map(encuesta => (
             <div className="col-md-6 mb-4" key={encuesta.id_encuesta}>
-              <div className={`card shadow-sm bg-${isDarkMode ? 'secondary' : 'light'} text-${isDarkMode ? 'light' : 'dark'}`} style={{ height: '200px' }}>
+              <div className="card shadow-sm bg-light text-dark" style={{ height: '200px' }}>
                 <div className="card-body">
                   <h5 className="card-title">{encuesta.titulo}</h5>
                   <p className="card-text">Estado: <strong>{encuesta.estado_encuesta}</strong></p>
