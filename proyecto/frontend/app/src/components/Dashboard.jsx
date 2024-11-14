@@ -38,38 +38,43 @@ const Dashboard = () => {
             });
             setDetallesEncuesta(response.data);
             setSelectedEncuesta(encuestaId);
-            calcularPorcentajeRespondidas(response.data);
+            calcularPorcentajeRespondidas(response.data); // Llamar la función para calcular el porcentaje
         } catch (error) {
             console.error('Error al obtener detalles de la encuesta:', error);
             alert('Error al obtener detalles de la encuesta');
         }
     };
-
     const calcularPorcentajeRespondidas = (encuestaDetalles) => {
         if (!encuestaDetalles || !encuestaDetalles.preguntas.length) {
             setPorcentajeRespondidas(0);
             return;
         }
-
-        // Contamos el número total de usuarios asignados a la encuesta
-        const totalUsuariosAsignados = encuestaDetalles.preguntas[0].respuestas.map(r => r.usuario.rut).filter((value, index, self) => self.indexOf(value) === index).length;
-
-        // Contamos los usuarios que han respondido al menos una pregunta
-        const usuariosConRespuestas = new Set();
-
-        encuestaDetalles.preguntas.forEach((pregunta) => {
-            pregunta.respuestas.forEach((respuesta) => {
-                if (respuesta.texto_respuesta || respuesta.opcion) {
-                    usuariosConRespuestas.add(respuesta.usuario.rut);
-                }
-            });
+            const totalUsuariosAsignados = encuestaDetalles.preguntas[0].respuestas
+            .map(r => r.usuario.rut)
+            .filter((value, index, self) => self.indexOf(value) === index).length;
+            const usuariosCompletamenteRespondido = new Set();
+            const usuariosRespuestas = encuestaDetalles.preguntas[0].respuestas.map(r => r.usuario.rut);
+        usuariosRespuestas.forEach((rut) => {
+            const haRespondidoTodasLasPreguntas = encuestaDetalles.preguntas.every((pregunta) =>
+                pregunta.respuestas.some(respuesta =>
+                    respuesta.usuario.rut === rut && (respuesta.texto_respuesta || respuesta.opcion)
+                )
+            );
+            
+            if (haRespondidoTodasLasPreguntas) {
+                usuariosCompletamenteRespondido.add(rut);
+            }
         });
-
-        // Calculamos el porcentaje basado en los usuarios únicos que han respondido al menos una pregunta
-        const porcentaje = totalUsuariosAsignados > 0 ? (usuariosConRespuestas.size / totalUsuariosAsignados) * 100 : 0;
+    
+        // Calcula el porcentaje
+        const porcentaje = totalUsuariosAsignados > 0 
+            ? (usuariosCompletamenteRespondido.size / totalUsuariosAsignados) * 100 
+            : 0;
+    
         setPorcentajeRespondidas(porcentaje.toFixed(1));
     };
-
+    
+    
     return (
         <div className="container mt-5">
             <h2 className="text-center">Dashboard de Encuestas</h2>
@@ -109,24 +114,18 @@ const Dashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {/* Iterar sobre cada usuario que haya respondido */}
                             {detallesEncuesta.preguntas[0]?.respuestas.map((_, index) => {
                                 const usuario = detallesEncuesta.preguntas[0].respuestas[index].usuario;
-
                                 return (
                                     <tr key={usuario.rut}>
-                                        {/* RUT del usuario en la primera columna */}
                                         <td>{usuario.rut}</td>
-                                        {/* Nombre del usuario en la segunda columna */}
                                         <td>
                                             {usuario.nombre} {usuario.apellido_paterno} {usuario.apellido_materno}
                                         </td>
-                                        {/* Respuestas del usuario para cada pregunta */}
                                         {detallesEncuesta.preguntas.map((pregunta) => {
                                             const respuesta = pregunta.respuestas.find(
                                                 (resp) => resp.usuarioId === usuario.rut
                                             );
-
                                             return (
                                                 <td key={pregunta.id_pregunta}>
                                                     {respuesta

@@ -1,15 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Text, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { CircularProgress, IconButton, Tooltip as MuiTooltip } from '@mui/material';
+import { CircularProgress, IconButton, Tooltip as MuiTooltip, Button } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { BarChart as BarChartIcon, PieChart as PieChartIcon } from '@mui/icons-material';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const EstadisticasEncuesta = () => {
     const { encuestaId } = useParams();
     const [estadisticas, setEstadisticas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isPieChart, setIsPieChart] = useState(true);
+
+    const chartRefs = useRef([]);
 
     useEffect(() => {
         if (!encuestaId) {
@@ -42,6 +46,44 @@ const EstadisticasEncuesta = () => {
 
     const handleToggleChart = () => {
         setIsPieChart(!isPieChart);
+    };
+
+    const generateChartImage = (chartRef) => {
+        return new Promise((resolve, reject) => {
+            html2canvas(chartRef, { scale: 2 })
+                .then((canvas) => {
+                    const imgData = canvas.toDataURL('image/png');
+                    resolve(imgData);
+                })
+                .catch(reject);
+        });
+    };
+
+    const handleDownloadPDF = async () => {
+        const doc = new jsPDF();
+        let yOffset = 10;
+        for (let index = 0; index < estadisticas.length; index++) {
+            const pregunta = estadisticas[index];
+            const chartRef = chartRefs.current[index];
+            try {
+                const imgData = await generateChartImage(chartRef);
+                doc.setFontSize(12);
+                doc.text(pregunta.texto_pregunta, 10, yOffset);
+                doc.addImage(imgData, 'PNG', 10, yOffset + 5, 200, 120); // Ajusta la posición y el tamaño
+                yOffset += 110; // Ajusta el desplazamiento para el siguiente gráfico
+
+                if (yOffset > 270) {
+                    doc.addPage();
+                    yOffset = 10;
+                }
+
+            } catch (error) {
+                console.error('Error al generar la imagen del gráfico:', error);
+            }
+        }
+
+        // Guarda el documento PDF
+        doc.save('reporte_estadisticas.pdf');
     };
 
     if (loading) {
@@ -79,10 +121,10 @@ const EstadisticasEncuesta = () => {
             </div>
 
             {estadisticas.map((pregunta, index) => (
-                <div key={index} style={{ marginBottom: '2rem', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+                <div key={index} style={{ marginBottom: '2rem', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }} ref={(el) => chartRefs.current[index] = el}>
                     <h3 style={{ fontSize: '1.5rem', color: '#333', marginBottom: '1rem' }}>{pregunta.texto_pregunta}</h3>
-                    
-                    <ResponsiveContainer width="100%" height={400}>
+
+                    <ResponsiveContainer width="100%" height={505}>
                         {isPieChart ? (
                             <PieChart>
                                 <Pie
@@ -95,7 +137,7 @@ const EstadisticasEncuesta = () => {
                                     cy="50%"
                                     labelLine={false}
                                     label={renderCustomizedLabel}
-                                    outerRadius={160}
+                                    outerRadius={200} 
                                     innerRadius={80}
                                     dataKey="value"
                                     isAnimationActive={true}
@@ -125,6 +167,9 @@ const EstadisticasEncuesta = () => {
                     </ResponsiveContainer>
                 </div>
             ))}
+            <Button onClick={handleDownloadPDF} variant="contained" color="primary">
+                Descargar Reporte PDF
+            </Button>
         </div>
     );
 };
