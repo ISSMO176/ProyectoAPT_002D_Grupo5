@@ -1,4 +1,3 @@
-// src/components/AsignarEncuestas.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -11,6 +10,7 @@ const AsignarEncuestas = () => {
     const [areas, setAreas] = useState([]);
     const [encuestas, setEncuestas] = useState([]);
     const [searchTerm, setSearchTerm] = useState(''); // Nuevo estado para el término de búsqueda
+    const [seleccionarTodos, setSeleccionarTodos] = useState(false); // Nuevo estado para seleccionar/deseleccionar todos
 
     useEffect(() => {
         const fetchUsuarios = async () => {
@@ -62,16 +62,20 @@ const AsignarEncuestas = () => {
         // Reiniciar selección de usuarios al cambiar el área o búsqueda
         const seleccionInicial = {};
         usuariosEnArea.forEach(usuario => {
-            seleccionInicial[usuario.rut] = false;
+            seleccionInicial[usuario.rut] = seleccionarTodos; // Actualiza según el estado de "Seleccionar todos"
         });
         setUsuariosSeleccionados(seleccionInicial);
-    }, [areaId, searchTerm, usuarios]);
+    }, [areaId, searchTerm, usuarios, seleccionarTodos]);
 
     const handleCheckboxChange = (rut) => {
         setUsuariosSeleccionados((prevSeleccionados) => ({
             ...prevSeleccionados,
             [rut]: !prevSeleccionados[rut],
         }));
+    };
+
+    const handleSelectAll = () => {
+        setSeleccionarTodos(prevState => !prevState); // Cambia el estado de "Seleccionar todos"
     };
 
     const handleAsignar = async () => {
@@ -156,6 +160,16 @@ const AsignarEncuestas = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+
+                    {/* Botón para seleccionar/deseleccionar todos los usuarios */}
+                    <button
+                        type="button"
+                        className="btn btn-secondary w-100 mb-3"
+                        onClick={handleSelectAll}
+                    >
+                        {seleccionarTodos ? "Desmarcar Todos" : "Seleccionar Todos"}
+                    </button>
+
                     <div className="form-group">
                         <label>Usuarios en el área seleccionada</label>
                         {usuariosFiltrados.map((usuario) => (
