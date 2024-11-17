@@ -1,15 +1,15 @@
 *Rama para el desarrollo*
 *Pasos para Clonar y probar la plataforma*
 
-**En la ruta de carpeta Frontend**
+**1)  En la ruta de carpeta Frontend**
 
 En frontend/app ejecutar : npm install @vitejs/plugin-react --save-dev
 
-**En la ruta de carpeta Backend**
+**2)  En la ruta de carpeta Backend**
 
 Ejecutar: npx prisma migrate dev --name init
 
-**En la carpeta raiz del proyecto**
+**3)  En la carpeta raiz del proyecto**
 
 Ejecutar: npm install concurrently --save-dev
 
