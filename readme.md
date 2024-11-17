@@ -1,4 +1,5 @@
 *Rama para el desarrollo*
+
 *Pasos para Clonar y probar la plataforma*
 
 **1)  En la ruta de carpeta Frontend**
