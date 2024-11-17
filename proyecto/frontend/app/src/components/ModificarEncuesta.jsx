@@ -6,15 +6,21 @@ const ModificarEncuesta = () => {
   const { idEncuesta } = useParams(); // Obtenemos el ID desde la URL
   const navigate = useNavigate();
   const [encuesta, setEncuesta] = useState({ titulo: '', estado_encuesta: '' });
+  const [error, setError] = useState('');
+  const [mensaje, setMensaje] = useState('');
 
   // Cargar los datos de la encuesta a modificar
   useEffect(() => {
     const fetchEncuesta = async () => {
       try {
-        const response = await axios.get(`http://localhost:4000/api/encuestas/${idEncuesta}`);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`http://localhost:4000/api/encuestas/${idEncuesta}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setEncuesta(response.data);
       } catch (error) {
         console.error('Error al cargar la encuesta:', error);
+        setError('No se pudo cargar la encuesta. Intente nuevamente.');
       }
     };
     fetchEncuesta();
@@ -23,11 +29,19 @@ const ModificarEncuesta = () => {
   // Manejar el envío del formulario para guardar los cambios
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setMensaje('');
+
     try {
-      await axios.put(`http://localhost:4000/api/encuestas/${idEncuesta}`, encuesta);
-      navigate('/encuestas'); // Redirigir de vuelta a la lista de encuestas
+      const token = localStorage.getItem('token');
+      await axios.put(`http://localhost:4000/api/encuestas/${idEncuesta}`, encuesta, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMensaje('Cambios guardados con éxito.');
+      setTimeout(() => navigate('/encuestas'), 2000); // Redirigir después de un tiempo
     } catch (error) {
       console.error('Error al modificar la encuesta:', error);
+      setError('Error al modificar la encuesta. Intente nuevamente.');
     }
   };
 
@@ -64,10 +78,13 @@ const ModificarEncuesta = () => {
               required
             >
               <option value="">Seleccionar Estado</option>
-              <option value="Activa">Activa</option>
-              <option value="Inactiva">Inactiva</option>
+              <option value="Habilitada">Habilitada</option>
+              <option value="Deshabilitada">Deshabilitada</option>
             </select>
           </div>
+
+          {mensaje && <div className="alert alert-success mt-3">{mensaje}</div>}
+          {error && <div className="alert alert-danger mt-3">{error}</div>}
 
           <div className="d-flex justify-content-between">
             <button type="submit" className="btn btn-primary">Guardar Cambios</button>

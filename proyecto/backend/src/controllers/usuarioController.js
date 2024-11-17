@@ -107,34 +107,41 @@ export const crearUsuario = async (req, res) => {
 
 // Modificar usuario
 export const modificarUsuario = async (req, res) => {
-  const { rut } = req.params;
-  const { nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
+  const { rut } = req.params; // El RUT proviene de los parámetros de la ruta
+  const { nombre, apellido_paterno, apellido_materno, correo, contrasena } = req.body;
 
-  if (!nombre || !apellido_paterno || !correo || !contrasena || !rolId || !areaId_area) {
+  // Validar que los campos requeridos estén presentes
+  if (!nombre || !apellido_paterno || !correo) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
   try {
-    const contrasenaEncriptada = await bcrypt.hash(contrasena, 10); // Encriptar nueva contraseña
+    // Crear un objeto con los datos a actualizar
+    const data = {
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      correo,
+    };
+
+    // Si se envía una nueva contraseña, encriptarla y añadirla
+    if (contrasena) {
+      const nuevaContrasenaEncriptada = await bcrypt.hash(contrasena, 10);
+      data.contrasena = nuevaContrasenaEncriptada;
+    }
+
+    // Actualizar los datos del usuario
     const usuarioModificado = await prisma.usuario.update({
       where: { rut },
-      data: {
-        nombre,
-        apellido_paterno,
-        apellido_materno,
-        correo,
-        contrasena: contrasenaEncriptada, 
-        rolId,
-        areaId_area,
-      },
+      data,
     });
+
     res.status(200).json(usuarioModificado);
   } catch (error) {
     console.error('Error al modificar el usuario:', error);
     res.status(500).json({ error: 'Error al modificar el usuario', details: error.message });
   }
 };
-
 // Eliminar usuario
 export const eliminarUsuario = async (req, res) => {
   const { rut } = req.params;
@@ -151,15 +158,26 @@ export const eliminarUsuario = async (req, res) => {
 };
 
 
-
-
 export const obtenerPerfil = async (req, res) => {
   try {
     const usuario = await prisma.usuario.findUnique({
-      where: { correo: req.usuario.correo }, // O el identificador que uses
+      where: { rut: req.user.rut }, // Usamos el RUT desde el token
       select: {
+        rut: true,
         nombre: true,
+        apellido_paterno: true,
+        apellido_materno: true,
         correo: true,
+        rol: {
+          select: {
+            nombre_rol: true,
+          },
+        },
+        Area: {
+          select: {
+            nombre_area: true,
+          },
+        },
       },
     });
 
@@ -167,7 +185,7 @@ export const obtenerPerfil = async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    res.json(usuario);
+    res.status(200).json(usuario);
   } catch (error) {
     console.error('Error al obtener el perfil:', error);
     res.status(500).json({ error: 'Error al obtener el perfil', details: error.message });
@@ -176,24 +194,45 @@ export const obtenerPerfil = async (req, res) => {
 
 // Actualizar perfil del usuario
 export const actualizarPerfil = async (req, res) => {
-  const { usuarioId } = req; // Suponiendo que el ID del usuario se obtiene del token
-  const { nombre, correo, telefono, direccion } = req.body;
+  const { nombre, apellido_paterno, apellido_materno, correo, contrasenaNueva } = req.body;
+  
+  // Validar que los campos requeridos estén presentes
+  if (!nombre || !apellido_paterno || !correo) {
+    return res.status(400).json({ error: 'Faltan datos requeridos' });
+  }
 
   try {
-    const usuarioActualizado = await prisma.usuario.update({
-      where: { id: usuarioId }, 
-      data: {
-        nombre,
-        correo,
-      },
+    // Crea el objeto de datos que será actualizado
+    const data = {
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      correo,
+    };
+
+    // Si se envía una nueva contraseña, encriptarla y añadirla
+    if (contrasenaNueva) {
+      const nuevaContrasenaEncriptada = await bcrypt.hash(contrasenaNueva, 10);
+      data.contrasena = nuevaContrasenaEncriptada;
+    }
+
+    // Actualiza el usuario en la base de datos usando el RUT del token
+    const usuarioModificado = await prisma.usuario.update({
+      where: { rut: req.user.rut },
+      data,
     });
 
-    res.status(200).json(usuarioActualizado);
+    res.status(200).json(usuarioModificado);
   } catch (error) {
-    console.error('Error al actualizar perfil:', error);
-    res.status(500).json({ error: 'Error al actualizar perfil', details: error.message });
+    console.error('Error al actualizar el perfil:', error);
+    res.status(500).json({ error: 'Error al actualizar el perfil', details: error.message });
   }
 };
+
+
+
+  
+
 
 
 const __filename = fileURLToPath(import.meta.url);

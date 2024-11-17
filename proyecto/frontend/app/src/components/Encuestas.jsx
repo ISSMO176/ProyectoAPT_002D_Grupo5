@@ -8,12 +8,6 @@ const Encuestas = () => {
   const encuestasPerPage = 6;
   const navigate = useNavigate();
 
-  // Función para redirigir al login si no hay token o es inválido
-  const handleUnauthorized = () => {
-    alert('Sesión expirada o no autorizada. Redirigiendo al login.');
-    navigate('/login');
-  };
-
   const handleCrearEncuesta = () => {
     navigate('/crear-encuesta');
   };
@@ -27,9 +21,8 @@ const Encuestas = () => {
   };
 
   const handleToggleEncuesta = async (idEncuesta, estadoActual) => {
-    const nuevoEstado = estadoActual === 'Activa' ? 'Deshabilitada' : 'Activa';
     try {
-      const token = localStorage.getItem('token'); 
+      const token = localStorage.getItem('token');
       await axios.put(
         `http://localhost:4000/api/encuestas/deshabilitar/${idEncuesta}`,
         {},
@@ -37,34 +30,25 @@ const Encuestas = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      fetchEncuestas();
+      fetchEncuestas(); // Actualizar la lista de encuestas
     } catch (error) {
-      console.error(`Error al ${nuevoEstado === 'Deshabilitada' ? 'deshabilitar' : 'habilitar'} la encuesta:`, error);
-      if (error.response && error.response.status === 401) {
-        handleUnauthorized();
-      }
+      console.error('Error al cambiar el estado de la encuesta:', error);
     }
   };
 
   const fetchEncuestas = async () => {
     try {
-      const token = localStorage.getItem('token'); 
-      if (!token) {
-        handleUnauthorized();
-        return;
-      }
-
+      const token = localStorage.getItem('token');
       const response = await axios.get('http://localhost:4000/api/encuestas', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const sortedEncuestas = response.data.sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
+      const sortedEncuestas = response.data.sort(
+        (a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion)
+      );
       setEncuestas(sortedEncuestas);
     } catch (error) {
       console.error('Error al obtener las encuestas:', error);
-      if (error.response && error.response.status === 401) {
-        handleUnauthorized();
-      }
     }
   };
 
@@ -107,16 +91,23 @@ const Encuestas = () => {
                   <p className="card-text">
                     Estado: <strong>{encuesta.estado_encuesta}</strong>
                   </p>
-                  <p className="card-text">Fecha de Creación: {new Date(encuesta.fecha_creacion).toLocaleDateString()}</p>
+                  <p className="card-text">
+                    Fecha de Creación: {new Date(encuesta.fecha_creacion).toLocaleDateString()}
+                  </p>
                   <div className="d-flex justify-content-between mt-4">
-                    <button className="btn btn-warning" onClick={() => handleModificarEncuesta(encuesta.id_encuesta)}>
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => handleModificarEncuesta(encuesta.id_encuesta)}
+                    >
                       Modificar
                     </button>
                     <button
-                      className={`btn ${encuesta.estado_encuesta === 'Activa' ? 'btn-danger' : 'btn-success'}`}
+                      className={`btn ${
+                        encuesta.estado_encuesta === 'Habilitada' ? 'btn-danger' : 'btn-success'
+                      }`}
                       onClick={() => handleToggleEncuesta(encuesta.id_encuesta, encuesta.estado_encuesta)}
                     >
-                      {encuesta.estado_encuesta === 'Activa' ? 'Deshabilitar' : 'Habilitar'}
+                      {encuesta.estado_encuesta === 'Habilitada' ? 'Deshabilitar' : 'Habilitar'}
                     </button>
                     <button
                       className="btn btn-primary"
@@ -141,7 +132,11 @@ const Encuestas = () => {
         <span>
           Página {currentPage} de {Math.ceil(encuestas.length / encuestasPerPage)}
         </span>
-        <button className="btn btn-secondary" onClick={handleNextPage} disabled={currentPage === Math.ceil(encuestas.length / encuestasPerPage)}>
+        <button
+          className="btn btn-secondary"
+          onClick={handleNextPage}
+          disabled={currentPage === Math.ceil(encuestas.length / encuestasPerPage)}
+        >
           Siguiente
         </button>
       </div>

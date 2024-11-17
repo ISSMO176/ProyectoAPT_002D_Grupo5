@@ -31,7 +31,8 @@ const Navbar = () => {
         <div className={`navbar-links ${isMenuOpen ? 'active' : ''}`}>
           <Link to="/encuestas" className="nav-link">Encuestas</Link>
           <Link to="/areas" className="nav-link">Áreas</Link>
-          <Link to="/mis-encuestas" className="nav-link">Mis Encuestas</Link>
+          <Link to="/misencuestas" className="nav-link">Mis Encuestas</Link>
+          <Link to="/asignarencuestas" className="nav-link">Asignar Encuestas</Link>
         </div>
         <div className="navbar-right">
           <button className="icon-button" aria-label="Notificaciones">

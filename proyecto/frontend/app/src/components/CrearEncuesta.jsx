@@ -3,7 +3,6 @@ import axios from 'axios';
 
 const CrearEncuesta = () => {
   const [titulo, setTitulo] = useState('');
-  const [estadoEncuesta, setEstadoEncuesta] = useState('Habilitada');
   const [fechaCreacion, setFechaCreacion] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
@@ -22,8 +21,7 @@ const CrearEncuesta = () => {
     try {
       const response = await axios.post('http://localhost:4000/api/encuestas', {
         titulo,
-        estado_encuesta: estadoEncuesta,
-        fecha_creacion: fechaCreacion || new Date().toISOString(), // Usar fecha seleccionada o actual
+        fecha_creacion: fechaCreacion || new Date().toISOString().split('T')[0], // Usar fecha seleccionada o actual
       });
       setMensaje('Encuesta creada con éxito.');
       setTitulo('');
@@ -47,17 +45,6 @@ const CrearEncuesta = () => {
             onChange={(e) => setTitulo(e.target.value)} 
             required 
           />
-        </div>
-        <div className="form-group">
-          <label>Estado:</label>
-          <select 
-            className="form-control" 
-            value={estadoEncuesta} 
-            onChange={(e) => setEstadoEncuesta(e.target.value)}
-          >
-            <option value="Habilitada">Habilitada</option>
-            <option value="Deshabilitada">Deshabilitada</option>
-          </select>
         </div>
         <div className="form-group">
           <label>Fecha de Creación:</label>

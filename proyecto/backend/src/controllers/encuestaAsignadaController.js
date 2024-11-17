@@ -51,7 +51,7 @@ export const obtenerEncuestasAsignadas = async (req, res) => {
                 usuarioId,
                 estado: "pendiente",
                 encuesta: {
-                    estado_encuesta: "Activa"
+                    estado_encuesta: "Habilitada"
                 }
             },
             include: {
@@ -103,29 +103,30 @@ export const obtenerPreguntasDeEncuestaAsignada = async (req, res) => {
 // Obtener datos de completitud de encuesta
 export const obtenerCompletitudEncuesta = async (req, res) => {
     const { encuestaId } = req.params;
-
+  
     try {
-        // Total de usuarios asignados a la encuesta
-        const totalUsuariosAsignados = await prisma.encuestaAsignada.count({
-            where: { encuestaId: parseInt(encuestaId) }
-        });
-
-        // Total de usuarios que han respondido completamente la encuesta
-        const usuariosQueRespondieron = await prisma.encuestaAsignada.findMany({
-            where: {
-                encuestaId: parseInt(encuestaId),
-                estado: 'completada'
-            },
-            select: {
-                usuarioId: true
-            }
-        });
-
-        const totalUsuariosQueRespondieron = usuariosQueRespondieron.length;
-
-        res.json({ totalUsuariosAsignados, totalUsuariosQueRespondieron });
+      // Total de usuarios asignados a la encuesta
+      const totalUsuariosAsignados = await prisma.encuestaAsignada.count({
+        where: { encuestaId: parseInt(encuestaId) },
+      });
+  
+      // Total de usuarios que han completado la encuesta
+      const totalUsuariosQueRespondieron = await prisma.encuestaAsignada.count({
+        where: {
+          encuestaId: parseInt(encuestaId),
+          estado: "completada", // Estado de encuesta completada
+        },
+      });
+  
+      res.status(200).json({
+        totalUsuariosAsignados,
+        totalUsuariosQueRespondieron,
+      });
     } catch (error) {
-        console.error('Error al obtener datos de completitud de la encuesta:', error);
-        res.status(500).json({ error: 'Error al obtener datos de completitud de la encuesta', details: error.message });
+      console.error("Error al obtener datos de completitud de la encuesta:", error);
+      res.status(500).json({
+        error: "Error al obtener datos de completitud de la encuesta",
+        details: error.message,
+      });
     }
-};
+  };
