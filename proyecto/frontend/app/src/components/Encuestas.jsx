@@ -8,6 +8,12 @@ const Encuestas = () => {
   const encuestasPerPage = 6;
   const navigate = useNavigate();
 
+  // Función para redirigir al login si no hay token o es inválido
+  const handleUnauthorized = () => {
+    alert('Sesión expirada o no autorizada. Redirigiendo al login.');
+    navigate('/login');
+  };
+
   const handleCrearEncuesta = () => {
     navigate('/crear-encuesta');
   };
@@ -23,20 +29,42 @@ const Encuestas = () => {
   const handleToggleEncuesta = async (idEncuesta, estadoActual) => {
     const nuevoEstado = estadoActual === 'Activa' ? 'Deshabilitada' : 'Activa';
     try {
-      await axios.put(`http://localhost:4000/api/encuestas/deshabilitar/${idEncuesta}`);
+      const token = localStorage.getItem('token'); 
+      await axios.put(
+        `http://localhost:4000/api/encuestas/deshabilitar/${idEncuesta}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       fetchEncuestas();
     } catch (error) {
       console.error(`Error al ${nuevoEstado === 'Deshabilitada' ? 'deshabilitar' : 'habilitar'} la encuesta:`, error);
+      if (error.response && error.response.status === 401) {
+        handleUnauthorized();
+      }
     }
   };
 
   const fetchEncuestas = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/encuestas');
+      const token = localStorage.getItem('token'); 
+      if (!token) {
+        handleUnauthorized();
+        return;
+      }
+
+      const response = await axios.get('http://localhost:4000/api/encuestas', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       const sortedEncuestas = response.data.sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
       setEncuestas(sortedEncuestas);
     } catch (error) {
       console.error('Error al obtener las encuestas:', error);
+      if (error.response && error.response.status === 401) {
+        handleUnauthorized();
+      }
     }
   };
 
@@ -50,13 +78,13 @@ const Encuestas = () => {
 
   const handleNextPage = () => {
     if (currentPage < Math.ceil(encuestas.length / encuestasPerPage)) {
-      setCurrentPage(prev => prev + 1);
+      setCurrentPage((prev) => prev + 1);
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
+      setCurrentPage((prev) => prev - 1);
     }
   };
 
@@ -71,18 +99,17 @@ const Encuestas = () => {
 
       <div className="row">
         {currentEncuestas.length > 0 ? (
-          currentEncuestas.map(encuesta => (
+          currentEncuestas.map((encuesta) => (
             <div className="col-md-6 mb-4" key={encuesta.id_encuesta}>
               <div className="card shadow-sm bg-light text-dark" style={{ height: '200px' }}>
                 <div className="card-body">
                   <h5 className="card-title">{encuesta.titulo}</h5>
-                  <p className="card-text">Estado: <strong>{encuesta.estado_encuesta}</strong></p>
+                  <p className="card-text">
+                    Estado: <strong>{encuesta.estado_encuesta}</strong>
+                  </p>
                   <p className="card-text">Fecha de Creación: {new Date(encuesta.fecha_creacion).toLocaleDateString()}</p>
                   <div className="d-flex justify-content-between mt-4">
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => handleModificarEncuesta(encuesta.id_encuesta)}
-                    >
+                    <button className="btn btn-warning" onClick={() => handleModificarEncuesta(encuesta.id_encuesta)}>
                       Modificar
                     </button>
                     <button
@@ -111,7 +138,9 @@ const Encuestas = () => {
         <button className="btn btn-secondary" onClick={handlePreviousPage} disabled={currentPage === 1}>
           Anterior
         </button>
-        <span>Página {currentPage} de {Math.ceil(encuestas.length / encuestasPerPage)}</span>
+        <span>
+          Página {currentPage} de {Math.ceil(encuestas.length / encuestasPerPage)}
+        </span>
         <button className="btn btn-secondary" onClick={handleNextPage} disabled={currentPage === Math.ceil(encuestas.length / encuestasPerPage)}>
           Siguiente
         </button>

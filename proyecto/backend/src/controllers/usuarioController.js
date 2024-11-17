@@ -14,32 +14,39 @@ export const login = async (req, res) => {
   const { rut, contrasena } = req.body;
 
   try {
-    const usuario = await prisma.usuario.findUnique({ where: { rut } });
+    const usuario = await prisma.usuario.findUnique({
+      where: { rut },
+      include: { rol: true }, // Incluye el rol del usuario
+    });
 
     if (!usuario) {
       return res.status(401).json({ error: 'Usuario no encontrado' });
     }
 
-    if (!usuario.activo) {
-      return res.status(403).json({ error: 'Usuario deshabilitado. Contacta al administrador.' });
+    const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
+    if (!contrasenaValida) {
+      return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
-    const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
-    if (!contrasenaValida) return res.status(401).json({ error: 'Contraseña incorrecta' });
+    // Genera un token con el rol incluido
+    const token = jwt.sign(
+      { rut: usuario.rut, rol: usuario.rol.nombre_rol },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    const token = jwt.sign({ rut: usuario.rut }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (error) {
+    console.error('Error en el login:', error);
     res.status(500).json({ error: 'Error en el login' });
   }
 };
-
 
 export const cambiarEstadoUsuario = async (req, res) => {
   const { rut } = req.params;
   const { activo } = req.body;
   
-  console.log(`Cambiando estado de usuario con RUT ${rut} a ${activo}`); // Log para depuración
+  console.log(`Cambiando estado de usuario con RUT ${rut} a ${activo}`); 
 
   try {
     const usuarioModificado = await prisma.usuario.update({
@@ -57,8 +64,8 @@ export const obtenerUsuarios = async (req, res) => {
   try {
     const usuarios = await prisma.usuario.findMany({
       include: {
-        rol: true, // Incluir el rol si lo deseas
-        Area: true, // Incluir área si lo deseas
+        rol: true, 
+        Area: true, 
       },
     });
     res.status(200).json(usuarios);
@@ -78,7 +85,6 @@ export const crearUsuario = async (req, res) => {
   }
 
   try {
-    // Encriptar la contraseña antes de almacenarla
     const contrasenaEncriptada = await bcrypt.hash(contrasena, 10);
     const nuevoUsuario = await prisma.usuario.create({
       data: {
@@ -104,7 +110,6 @@ export const modificarUsuario = async (req, res) => {
   const { rut } = req.params;
   const { nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
 
-  // Validar que todos los campos estén presentes
   if (!nombre || !apellido_paterno || !correo || !contrasena || !rolId || !areaId_area) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
@@ -118,7 +123,7 @@ export const modificarUsuario = async (req, res) => {
         apellido_paterno,
         apellido_materno,
         correo,
-        contrasena: contrasenaEncriptada, // Usar la contraseña encriptada
+        contrasena: contrasenaEncriptada, 
         rolId,
         areaId_area,
       },

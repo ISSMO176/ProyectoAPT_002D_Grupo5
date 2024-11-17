@@ -22,6 +22,7 @@ app.use(cors({
 app.options('*', cors());
 
 app.use(express.json());
+
 // Rutas para encuestas
 app.use('/api/encuestas', encuestaRoutes); // Prefijo específico para encuestas
 // Rutas para usuarios

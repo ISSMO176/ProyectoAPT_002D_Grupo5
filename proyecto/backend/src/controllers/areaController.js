@@ -16,7 +16,7 @@ export const obtenerAreas = async (req, res) => {
 export const crearArea = async (req, res) => {
   const { nombre_area } = req.body;
 
-  // Validar que el campo esté presente
+
   if (!nombre_area) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
@@ -24,7 +24,7 @@ export const crearArea = async (req, res) => {
   try {
     const nuevaArea = await prisma.area.create({
       data: { 
-        nombre_area // Solo se incluye nombre_area
+        nombre_area 
       },
     });
     res.status(201).json(nuevaArea);
@@ -39,7 +39,7 @@ export const actualizarArea = async (req, res) => {
   const { id } = req.params; 
   const { nombre_area } = req.body; 
 
-  // Validar que el campo esté presente
+
   if (!nombre_area) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
