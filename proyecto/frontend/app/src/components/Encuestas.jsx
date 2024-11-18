@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { PlusCircle } from 'lucide-react';
 
 const Encuestas = () => {
   const [encuestas, setEncuestas] = useState([]);
@@ -8,47 +12,35 @@ const Encuestas = () => {
   const encuestasPerPage = 6;
   const navigate = useNavigate();
 
-  const handleCrearEncuesta = () => {
-    navigate('/crear-encuesta');
-  };
-
-  const handleModificarEncuesta = (idEncuesta) => {
-    navigate(`/modificar-encuesta/${idEncuesta}`);
-  };
-
-  const handleAgregarPreguntas = (idEncuesta) => {
-    navigate(`/agregar-preguntas/${idEncuesta}`);
-  };
-
-  const handleToggleEncuesta = async (idEncuesta, estadoActual) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.put(
-        `http://localhost:4000/api/encuestas/deshabilitar/${idEncuesta}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      fetchEncuestas(); // Actualizar la lista de encuestas
-    } catch (error) {
-      console.error('Error al cambiar el estado de la encuesta:', error);
-    }
-  };
-
   const fetchEncuestas = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get('http://localhost:4000/api/encuestas', {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const sortedEncuestas = response.data.sort(
         (a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion)
       );
       setEncuestas(sortedEncuestas);
     } catch (error) {
-      console.error('Error al obtener las encuestas:', error);
+      console.error('Error al obtener las encuestas:', error.message);
+    }
+  };
+
+  const handleCrearEncuesta = () => navigate('/crear-encuesta');
+  const handleModificarEncuesta = (idEncuesta) => navigate(`/modificar-encuesta/${idEncuesta}`);
+  const handleAgregarPreguntas = (idEncuesta) => navigate(`/agregar-preguntas/${idEncuesta}`);
+  const handleToggleEncuesta = async (idEncuesta) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `http://localhost:4000/api/encuestas/deshabilitar/${idEncuesta}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchEncuestas(); // Actualizar la lista
+    } catch (error) {
+      console.error('Error al cambiar el estado de la encuesta:', error.message);
     }
   };
 
@@ -62,83 +54,71 @@ const Encuestas = () => {
 
   const handleNextPage = () => {
     if (currentPage < Math.ceil(encuestas.length / encuestasPerPage)) {
-      setCurrentPage((prev) => prev + 1);
+      setCurrentPage(currentPage + 1);
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
+      setCurrentPage(currentPage - 1);
     }
   };
 
   return (
-    <div className="container mt-4 bg-light text-dark">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Gestión de Encuestas</h2>
-        <button className="btn btn-success" onClick={handleCrearEncuesta}>
-          Crear Nueva Encuesta
-        </button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold">Gestión de Encuestas</h2>
+        <Button onClick={handleCrearEncuesta}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Crear Nueva Encuesta
+        </Button>
       </div>
 
-      <div className="row">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {currentEncuestas.length > 0 ? (
           currentEncuestas.map((encuesta) => (
-            <div className="col-md-6 mb-4" key={encuesta.id_encuesta}>
-              <div className="card shadow-sm bg-light text-dark" style={{ height: '200px' }}>
-                <div className="card-body">
-                  <h5 className="card-title">{encuesta.titulo}</h5>
-                  <p className="card-text">
-                    Estado: <strong>{encuesta.estado_encuesta}</strong>
-                  </p>
-                  <p className="card-text">
-                    Fecha de Creación: {new Date(encuesta.fecha_creacion).toLocaleDateString()}
-                  </p>
-                  <div className="d-flex justify-content-between mt-4">
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => handleModificarEncuesta(encuesta.id_encuesta)}
-                    >
-                      Modificar
-                    </button>
-                    <button
-                      className={`btn ${
-                        encuesta.estado_encuesta === 'Habilitada' ? 'btn-danger' : 'btn-success'
-                      }`}
-                      onClick={() => handleToggleEncuesta(encuesta.id_encuesta, encuesta.estado_encuesta)}
-                    >
-                      {encuesta.estado_encuesta === 'Habilitada' ? 'Deshabilitar' : 'Habilitar'}
-                    </button>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => handleAgregarPreguntas(encuesta.id_encuesta)}
-                    >
-                      Agregar Preguntas
-                    </button>
-                  </div>
+            <Card key={encuesta.id_encuesta}>
+              <CardHeader>
+                <CardTitle>{encuesta.titulo}</CardTitle>
+                <CardDescription>
+                  Estado: <Badge>{encuesta.estado_encuesta}</Badge>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Fecha de Creación: {new Date(encuesta.fecha_creacion).toLocaleDateString()}</p>
+                <div className="flex justify-between mt-4">
+                  <Button variant="outline" onClick={() => handleModificarEncuesta(encuesta.id_encuesta)}>
+                    Modificar
+                  </Button>
+                  <Button
+                    variant={encuesta.estado_encuesta === 'Activa' ? 'destructive' : 'success'}
+                    onClick={() => handleToggleEncuesta(encuesta.id_encuesta)}
+                  >
+                    {encuesta.estado_encuesta === 'Activa' ? 'Deshabilitar' : 'Habilitar'}
+                  </Button>
+                  <Button variant="primary" onClick={() => handleAgregarPreguntas(encuesta.id_encuesta)}>
+                    Agregar Preguntas
+                  </Button>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))
         ) : (
-          <div className="alert alert-info">No hay encuestas disponibles.</div>
+          <p className="col-span-full text-center text-muted-foreground">No hay encuestas disponibles.</p>
         )}
       </div>
 
-      <div className="d-flex justify-content-between mt-4">
-        <button className="btn btn-secondary" onClick={handlePreviousPage} disabled={currentPage === 1}>
+      <div className="flex justify-between items-center mt-6">
+        <Button variant="outline" onClick={handlePreviousPage} disabled={currentPage === 1}>
           Anterior
-        </button>
-        <span>
-          Página {currentPage} de {Math.ceil(encuestas.length / encuestasPerPage)}
-        </span>
-        <button
-          className="btn btn-secondary"
+        </Button>
+        <span>Página {currentPage} de {Math.ceil(encuestas.length / encuestasPerPage)}</span>
+        <Button
+          variant="secondary"
           onClick={handleNextPage}
           disabled={currentPage === Math.ceil(encuestas.length / encuestasPerPage)}
         >
           Siguiente
-        </button>
+        </Button>
       </div>
     </div>
   );

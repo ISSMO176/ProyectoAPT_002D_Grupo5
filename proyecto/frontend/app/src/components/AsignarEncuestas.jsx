@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useParams } from 'react-router-dom';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const AsignarEncuestas = () => {
     const [encuestaId, setEncuestaId] = useState('');
@@ -9,8 +16,11 @@ const AsignarEncuestas = () => {
     const [usuariosSeleccionados, setUsuariosSeleccionados] = useState({});
     const [areas, setAreas] = useState([]);
     const [encuestas, setEncuestas] = useState([]);
+    const { idEncuesta } = useParams();
     const [searchTerm, setSearchTerm] = useState('');
     const [seleccionarTodos, setSeleccionarTodos] = useState(false);
+
+    console.log(idEncuesta);
 
     useEffect(() => {
         const fetchUsuarios = async () => {
@@ -107,87 +117,93 @@ const AsignarEncuestas = () => {
     };
 
     return (
-        <div className="container mt-5">
-            <h2 className="text-center">Asignar Encuesta</h2>
-            <div className="row">
-                {/* Columna izquierda para el formulario */}
-                <div className="col-md-6">
-                    <form>
-                        <div className="form-group mb-3">
-                            <label htmlFor="encuestaId">Seleccionar Encuesta</label>
-                            <select
-                                className="form-select"
-                                id="encuestaId"
-                                value={encuestaId}
-                                onChange={(e) => setEncuestaId(e.target.value)}
-                            >
-                                <option value="">Seleccione una encuesta</option>
-                                {encuestas.map((encuesta) => (
-                                    <option key={encuesta.id_encuesta} value={encuesta.id_encuesta}>
-                                        {encuesta.titulo}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="form-group mb-3">
-                            <label>Seleccionar Área</label>
-                            <select
-                                className="form-select"
-                                onChange={(e) => setAreaId(e.target.value)}
-                            >
-                                <option value="">Seleccionar Área</option>
-                                {areas.map((area) => (
-                                    <option key={area.id_area} value={area.id_area}>
-                                        {area.nombre_area}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <button type="button" className="btn btn-primary w-100" onClick={handleAsignar}>
-                            Asignar Encuesta
-                        </button>
-                    </form>
-                </div>
-
-                {/* Columna derecha para el buscador y listado de usuarios */}
-                <div className="col-md-6">
-                    <div className="form-group mb-3">
-                        <label>Buscar Usuario</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Buscar por nombre"
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-
-                    {/* Botón para seleccionar/deseleccionar todos los usuarios */}
-                    <button
-                        type="button"
-                        className="btn btn-secondary w-100 mb-3"
-                        onClick={handleSelectAll}
-                    >
-                        {seleccionarTodos ? "Desmarcar Todos" : "Seleccionar Todos"}
-                    </button>
-
-                    <div className="form-group">
-                        <label>Usuarios en el área seleccionada</label>
-                        {usuariosFiltrados.map((usuario) => (
-                            <div key={usuario.rut} className="form-check">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    value={usuario.rut}
-                                    checked={usuariosSeleccionados[usuario.rut] || false}
-                                    onChange={() => handleCheckboxChange(usuario.rut)}
-                                />
-                                <label className="form-check-label">
-                                    {usuario.nombre} {usuario.apellido_paterno}
-                                </label>
+        <div className="container mx-auto px-4 py-8">
+            <h2 className="text-2xl font-bold mb-6">Asignar Encuesta</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Selección de Encuesta y Área</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <form className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="encuestaId">Seleccionar Encuesta</Label>
+                                <Select value={encuestaId} onValueChange={setEncuestaId}>
+                                    <SelectTrigger id="encuestaId">
+                                        <SelectValue placeholder="Seleccione una encuesta" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {encuestas.map((encuesta) => (
+                                            <SelectItem key={encuesta.id_encuesta} value={encuesta.id_encuesta.toString()}>
+                                                {encuesta.titulo}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                        ))}
-                    </div>
-                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="areaId">Seleccionar Área</Label>
+                                <Select value={areaId} onValueChange={setAreaId}>
+                                    <SelectTrigger id="areaId">
+                                        <SelectValue placeholder="Seleccionar Área" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {areas.map((area) => (
+                                            <SelectItem key={area.id_area} value={area.id_area.toString()}>
+                                                {area.nombre_area}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <Button type="button" className="w-full" onClick={handleAsignar}>
+                                Asignar Encuesta
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Usuarios en el área seleccionada</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="searchUser">Buscar Usuario</Label>
+                                <Input
+                                    id="searchUser"
+                                    type="text"
+                                    placeholder="Buscar por nombre"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full"
+                                onClick={handleSelectAll}
+                            >
+                                {seleccionarTodos ? "Desmarcar Todos" : "Seleccionar Todos"}
+                            </Button>
+                            <div className="space-y-2">
+                                {usuariosFiltrados.map((usuario) => (
+                                    <div key={usuario.rut} className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id={usuario.rut}
+                                            checked={usuariosSeleccionados[usuario.rut] || false}
+                                            onCheckedChange={() => handleCheckboxChange(usuario.rut)}
+                                        />
+                                        <Label htmlFor={usuario.rut}>
+                                            {usuario.nombre} {usuario.apellido_paterno}
+                                        </Label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Plus, Pencil, Trash2 } from 'lucide-react'
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 const Areas = () => {
   const [areas, setAreas] = useState([]);
@@ -57,52 +63,60 @@ const Areas = () => {
   };
 
   return (
-    <div className="container mx-auto mt-5 p-4">
-      <h1 className="text-2xl font-bold mb-4">Listado de Áreas</h1>
+    <div className="container mx-auto px-4 py-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Gestión de Áreas</CardTitle>
+          <CardDescription>Administre las áreas de la organización</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreateOrUpdateArea} className="mb-6 flex items-center gap-4">
+            <Input
+              type="text"
+              placeholder="Nombre del área"
+              value={nombreArea}
+              onChange={(e) => setNombreArea(e.target.value)}
+              required
+            />
+            <Button type="submit">
+              {editingArea ? (
+                <>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Actualizar Área
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Agregar Área
+                </>
+              )}
+            </Button>
+          </form>
 
-      <form onSubmit={handleCreateOrUpdateArea} className="mb-4 d-flex align-items-center">
-        <input
-          type="text"
-          className="form-control me-2"
-          placeholder="Nombre del área"
-          value={nombreArea}
-          onChange={(e) => setNombreArea(e.target.value)}
-          required
-        />
-        <button className="btn btn-success" type="submit">
-          {editingArea ? 'Actualizar Área' : 'Agregar Área'}
-        </button>
-      </form>
-
-      <div className="overflow-x-auto">
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {areas.map((area) => (
-              <tr key={area.id_area} className="hover:bg-gray-100">
-                <td>{area.id_area}</td>
-                <td>{area.nombre_area}</td>
-                <td>
-                  <div className="d-flex justify-content-between">
-                    <button onClick={() => handleEdit(area)} className="btn btn-warning me-2">
-                      Editar
-                    </button>
-                    <button onClick={() => handleDelete(area.id_area)} className="btn btn-danger">
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {areas.map((area) => (
+                <TableRow key={area.id_area}>
+                  <TableCell>{area.id_area}</TableCell>
+                  <TableCell>{area.nombre_area}</TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="icon" className="mr-2" onClick={() => handleEdit(area)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

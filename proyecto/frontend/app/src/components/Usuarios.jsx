@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import UsuarioForm from './Usuarioform.jsx';
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import { Plus, Pencil, Trash2, Upload } from 'lucide-react'
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import UsuarioForm from './Usuarioform';
 
 const Usuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -111,68 +118,82 @@ const Usuarios = () => {
   };
 
   return (
-    <div>
-      <div className="header d-flex justify-content-between align-items-center p-3 text-light shadow">
-        <img src="/logo.png" alt="Logo" className="logo" style={{ width: '100px' }} />
-        <div>
-          <button className="btn btn-outline-light me-2">ENCUESTAS</button>
-          <button className="btn btn-dark">Perfil</button>
-        </div>
-      </div>
-
-      <div className="container mt-5 pt-5">
-        {!formVisible ? (
-          <>
-            <h2 className="text-center">Usuarios</h2>
-            <button className="btn btn-danger mb-4" onClick={handleCrearUsuario}>
-              Crear Usuario
-            </button>
-            <div className="list-group">
+    <div className="container mx-auto px-4 py-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Gestión de Usuarios</CardTitle>
+          <CardDescription>Administre los usuarios del sistema</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-between items-center mb-4">
+          <Dialog open={formVisible} onOpenChange={setFormVisible}>
+  <DialogTrigger asChild>
+    <Button onClick={handleCrearUsuario}>
+      <Plus className="mr-2 h-4 w-4" /> Crear Usuario
+    </Button>
+  </DialogTrigger>
+  <DialogContent className="sm:max-w-[425px]">
+    <DialogHeader>
+      <DialogTitle>{usuarioEditado ? 'Modificar Usuario' : 'Crear Usuario'}</DialogTitle>
+      <DialogDescription>
+        Complete los detalles del usuario y haga clic en guardar cuando termine.
+      </DialogDescription>
+    </DialogHeader>
+    <UsuarioForm
+      usuarioEditado={usuarioEditado}
+      onSave={handleGuardarUsuario}
+      onCancel={() => setFormVisible(false)}
+      roles={roles}
+      areas={areas}
+    />
+  </DialogContent>
+</Dialog> 
+            <div className="flex items-center space-x-2">
+              <Input type="file" accept=".xlsx, .xls" onChange={handleArchivoExcelChange} />
+              <Button onClick={handleCargarUsuariosDesdeExcel}>
+                <Upload className="mr-2 h-4 w-4" /> Cargar Excel
+              </Button>
+            </div>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>RUT</TableHead>
+                <TableHead>Correo</TableHead>
+                <TableHead>Rol</TableHead>
+                <TableHead>Área</TableHead>
+                <TableHead>Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {usuarios.map((usuario) => {
-                const rol = roles.find((r) => r.id_rol === usuario.rolId);
-                const area = areas.find((a) => a.id_area === usuario.areaId_area);
-
+                const rol = roles.find((r) => r.id_rol === usuario.rolId)
+                const area = areas.find((a) => a.id_area === usuario.areaId_area)
                 return (
-                  <div key={usuario.rut} className="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                      <strong>{usuario.nombre} {usuario.apellido_paterno} {usuario.apellido_materno}</strong><br />
-                      <small>RUT: {usuario.rut}</small><br />
-                      <small>Correo: {usuario.correo}</small><br />
-                      <small>Rol: {rol ? rol.nombre_rol : 'Sin rol'}</small><br />
-                      <small>Área: {area ? area.nombre_area : 'Sin área'}</small>
-                    </div>
-                    <div>
-                      <button className="btn btn-primary me-2" onClick={() => handleModificarUsuario(usuario)}>Modificar</button>
-                      <button className={`btn ${usuario.activo ? 'btn-warning' : 'btn-success'}`} onClick={() => handleCambiarEstadoUsuario(usuario)}>{usuario.activo ? 'Deshabilitar' : 'Habilitar'}</button>
-                    </div>
-                  </div>
-                );
+                  <TableRow key={usuario.rut}>
+                    <TableCell>{`${usuario.nombre} ${usuario.apellido_paterno} ${usuario.apellido_materno}`}</TableCell>
+                    <TableCell>{usuario.rut}</TableCell>
+                    <TableCell>{usuario.correo}</TableCell>
+                    <TableCell>{rol ? rol.nombre_rol : 'Sin rol'}</TableCell>
+                    <TableCell>{area ? area.nombre_area : 'Sin área'}</TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="icon" className="mr-2" onClick={() => handleModificarUsuario(usuario)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="destructive" size="icon" onClick={() => handleEliminarUsuario(usuario.rut)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
               })}
-            </div>
-
-            <div className="mt-5">
-              <h5>Formato de archivo Excel para cargar usuarios</h5>
-              <p>El archivo debe contener las siguientes columnas en la primera fila:</p>
-              <ul>
-                <li><strong>rut</strong>: El RUT del usuario en formato "12345678-9".</li>
-                <li><strong>nombre</strong>: Nombre del usuario.</li>
-                <li><strong>apellido_paterno</strong>: Apellido paterno del usuario.</li>
-                <li><strong>apellido_materno</strong>: Apellido materno del usuario.</li>
-                <li><strong>correo</strong>: Dirección de correo electrónico.</li>
-                <li><strong>contrasena</strong>: Contraseña del usuario.</li>
-                <li><strong>rolId</strong>: ID del rol.</li>
-                <li><strong>areaId_area</strong>: ID del área (opcional).</li>
-              </ul>
-              <input type="file" accept=".xlsx, .xls" onChange={handleArchivoExcelChange} />
-              <button className="btn btn-primary ms-2" onClick={handleCargarUsuariosDesdeExcel}>Cargar Usuarios desde Excel</button>
-            </div>
-          </>
-        ) : (
-          <UsuarioForm usuarioEditado={usuarioEditado} onSave={handleGuardarUsuario} onCancel={handleCancelar} roles={roles} areas={areas} />
-        )}
-      </div>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
-  );
-};
+  )
+}
 
 export default Usuarios;

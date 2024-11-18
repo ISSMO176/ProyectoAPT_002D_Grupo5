@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { Check, X } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-const UsuarioForm = ({ usuarioEditado, onSave, onCancel, roles, areas }) => {
+
+export default function UsuarioForm({ usuarioEditado = null, onSave, onCancel, roles, areas }) {
   const [rut, setRut] = useState('');
   const [isValidRut, setIsValidRut] = useState(null);
   const [nombre, setNombre] = useState('');
-  const [apellido_paterno, setApellidoPaterno] = useState('');
-  const [apellido_materno, setApellidoMaterno] = useState('');
+  const [apellidoPaterno, setApellidoPaterno] = useState('');
+  const [apellidoMaterno, setApellidoMaterno] = useState('');
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [rolId, setRolId] = useState(1);
-  const [areaId_area, setAreaIdArea] = useState(null);
+  const [areaIdArea, setAreaIdArea] = useState(null);
 
   const rutRegex = /^[0-9]{7,8}-[0-9Kk]$/;
 
@@ -26,9 +32,7 @@ const UsuarioForm = ({ usuarioEditado, onSave, onCancel, roles, areas }) => {
     }
   }, [usuarioEditado]);
 
-  const validarRUT = (rut) => {
-    return rutRegex.test(rut);
-  };
+  const validarRUT = (rut) => rutRegex.test(rut);
 
   const handleRutChange = (e) => {
     const newRut = e.target.value;
@@ -39,77 +43,95 @@ const UsuarioForm = ({ usuarioEditado, onSave, onCancel, roles, areas }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isValidRut) {
-      alert("Por favor ingrese un RUT válido");
+      alert('Por favor ingrese un RUT válido');
       return;
     }
-    const usuario = { rut, nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area };
+    const usuario = { rut, nombre, apellido_paterno: apellidoPaterno, apellido_materno: apellidoMaterno, correo, contrasena, rolId, areaId_area: areaIdArea };
     onSave(usuario);
   };
 
+
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>{usuarioEditado ? 'Modificar Usuario' : 'Crear Usuario'}</h3>
-      <div className="mb-3">
-        <label className="form-label">RUT</label>
-        <input
-          type="text"
-          className="form-control"
-          value={rut}
-          onChange={handleRutChange}
-          required
-        />
-        {isValidRut === null ? null : isValidRut ? (
-          <p style={{ color: 'green' }}>RUT válido</p>
-        ) : (
-          <p style={{ color: 'red' }}>RUT inválido</p>
+    <div className="w-full">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1.5">
+            <Label htmlFor="rut" className="text-sm font-medium">RUT</Label>
+            <Input id="rut" value={rut} onChange={handleRutChange} placeholder="Ej: 12345678-9" required />
+            {isValidRut === false && <p className="text-sm text-red-500">RUT inválido</p>}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="correo" className="text-sm font-medium">Correo Electrónico</Label>
+            <Input id="correo" value={correo} onChange={(e) => setCorreo(e.target.value)} type="email" placeholder="correo@ejemplo.com" required />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2.5 gap-8">
+          <div className="space-y-1.5">
+            <Label htmlFor="nombre" className="text-sm font-medium">Nombre</Label>
+            <Input id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre" required />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="apellido_paterno" className="text-sm font-medium">Apellido Paterno</Label>
+            <Input id="apellido_paterno" value={apellidoPaterno} onChange={(e) => setApellidoPaterno(e.target.value)} placeholder="Apellido Paterno" required />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="apellido_materno" className="text-sm font-medium">Apellido Materno</Label>
+            <Input id="apellido_materno" value={apellidoMaterno} onChange={(e) => setApellidoMaterno(e.target.value)} placeholder="Apellido Materno" />
+          </div>
+        </div>
+
+        {!usuarioEditado && (
+          <div className="space-y-1.5">
+            <Label htmlFor="contrasena" className="text-sm font-medium">Contraseña</Label>
+            <Input id="contrasena" value={contrasena} onChange={(e) => setContrasena(e.target.value)} type="password" placeholder="Contraseña" required />
+          </div>
         )}
-      </div>
-      <div className="mb-3">
-        <label className="form-label">Nombre</label>
-        <input type="text" className="form-control" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
-      </div>
-      <div className="mb-3">
-        <label className="form-label">Apellido Paterno</label>
-        <input type="text" className="form-control" value={apellido_paterno} onChange={(e) => setApellidoPaterno(e.target.value)} required />
-      </div>
-      <div className="mb-3">
-        <label className="form-label">Apellido Materno</label>
-        <input type="text" className="form-control" value={apellido_materno} onChange={(e) => setApellidoMaterno(e.target.value)}/>
-      </div>
-      <div className="mb-3">
-        <label className="form-label">Correo</label>
-        <input type="email" className="form-control" value={correo} onChange={(e) => setCorreo(e.target.value)} required />
-      </div>
-      <div className="mb-3">
-        <label className="form-label">Contraseña</label>
-        <input type="password" className="form-control" value={contrasena} onChange={(e) => setContrasena(e.target.value)} required />
-      </div>
-      <div className="mb-3">
-        <label className="form-label">Rol</label>
-        <select className="form-select" value={rolId} onChange={(e) => setRolId(Number(e.target.value))} required>
-          {roles.map((rol) => (
-            <option key={rol.id_rol} value={rol.id_rol}>
-              {rol.nombre_rol}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="mb-3">
-        <label className="form-label">Área</label>
-        <select className="form-select" value={areaId_area || ''} onChange={(e) => setAreaIdArea(e.target.value ? Number(e.target.value) : null)}>
-          <option value="">Seleccione un área (opcional)</option>
-          {areas.map((area) => (
-            <option key={area.id_area} value={area.id_area}>
-              {area.nombre_area}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button type="submit" className="btn btn-primary">{usuarioEditado ? 'Actualizar' : 'Crear'}</button>
-      <button type="button" className="btn btn-secondary ms-2" onClick={onCancel}>Cancelar</button>
-    </form>
-  );
-};
 
-export default UsuarioForm;
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1.5">
+            <Label htmlFor="rol" className="text-sm font-medium">Rol</Label>
+            <Select value={rolId} onValueChange={(value) => setRolId(Number(value))}>
+              <SelectTrigger id="rol">
+                <SelectValue placeholder="Seleccione un rol" />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((rol) => (
+                  <SelectItem key={rol.id_rol} value={rol.id_rol}>
+                    {rol.nombre_rol}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="area" className="text-sm font-medium">Área</Label>
+            <Select value={areaIdArea} onValueChange={(value) => setAreaIdArea(Number(value))}>
+              <SelectTrigger id="area">
+                <SelectValue placeholder="Seleccione un área" />
+              </SelectTrigger>
+              <SelectContent>
+                {areas.map((area) => (
+                  <SelectItem key={area.id_area} value={area.id_area}>
+                    {area.nombre_area}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
+        <div className="flex justify-end space-x-2 pt-6">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            <X className="mr-2 h-4 w-4" />
+            Cancelar
+          </Button>
+          <Button type="submit">
+            <Check className="mr-2 h-4 w-4" />
+            {usuarioEditado ? 'Actualizar' : 'Crear'} Usuario
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+}
