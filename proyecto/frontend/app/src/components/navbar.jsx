@@ -38,6 +38,7 @@ const Navbar = () => {
           <Link to="/misencuestas" className="nav-link" onClick={closeMenu}>Mis Encuestas</Link>
           <Link to="/asignarencuestas" className="nav-link" onClick={closeMenu}>Asignar Encuestas</Link>
           <Link to="/usuarios" className="nav-link" onClick={closeMenu}>Usuarios</Link>
+          <Link to="/dashboard" className="nav-link" onClick={closeMenu}>Dashboard</Link>
         </div>
         <div className="navbar-right">
           <button className="icon-button" aria-label="Notificaciones">

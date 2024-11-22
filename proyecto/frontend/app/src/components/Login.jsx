@@ -17,11 +17,11 @@ const Login = () => {
             localStorage.setItem('token', response.data.token);
             navigate('/misEncuestas');
         } catch (error) {
-            console.error('Error en el login', error);
-            setError('Credenciales incorrectas');
+            console.error('Error en el login:', error);
+            const mensajeError = error.response?.data?.error || 'Credenciales incorrectas';
+            setError(mensajeError);
         }
-    };
-
+        };
     return (
         <div className="login-page">
             <div className="image-side">
