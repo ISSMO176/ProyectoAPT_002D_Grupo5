@@ -20,9 +20,9 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleVerEstadisticas = (encuestaId) => {
-    navigate(`/estadisticas-encuesta/${encuestaId}`);
-  };
+  const handleVerEstadisticas = (encuestaId, titulo, fechaCreacion) => {
+    navigate(`/estadisticas-encuesta/${encuestaId}`, { state: { titulo, fechaCreacion } });
+  };  
 
   useEffect(() => {
     const fetchEncuestas = async () => {
@@ -169,9 +169,10 @@ const Dashboard = () => {
                 {totalRespondidas} de {totalAsignadas} ({((totalRespondidas / totalAsignadas) * 100).toFixed(1)}%)
               </p>
             </div>
-            <Button onClick={() => handleVerEstadisticas(selectedEncuesta)} className="mb-6">
-              <BarChart2 className="mr-2 h-4 w-4" /> Ver Estadísticas
-            </Button>
+              <Button onClick={() => handleVerEstadisticas(selectedEncuesta, detallesEncuesta.titulo, detallesEncuesta.fecha_creacion)}
+                  className="mb-6">
+                  <BarChart2 className="mr-2 h-4 w-4" /> Ver Estadísticas
+                </Button>
             <Table>
               <TableHeader>
                 <TableRow>

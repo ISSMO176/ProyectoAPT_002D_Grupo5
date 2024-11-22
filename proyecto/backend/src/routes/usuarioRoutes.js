@@ -9,8 +9,8 @@ import {
   cargarUsuariosDesdeExcel,
   upload,
   cambiarEstadoUsuario,
-   obtenerPerfil,
-   actualizarPerfil,
+  obtenerPerfil,
+  actualizarPerfil,
 } from '../controllers/usuarioController.js';
 import verificarToken from '../middleware/verificarToken.js';
 import authMiddleware from '../middleware/authMiddleware.js';

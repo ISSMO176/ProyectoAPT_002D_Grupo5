@@ -40,7 +40,7 @@ export const getStatistics = async (req, res) => {
             return {
                 texto_pregunta: pregunta.texto_pregunta,
                 opciones: opcionesConConteo,
-                tipo: pregunta.tipo || 'multiple' // Ajusta aquí el valor según tu lógica
+                tipo: pregunta.tipo || 'multiple'
             };
         }));
 
