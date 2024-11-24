@@ -5,7 +5,6 @@ import Login from '../components/Login';
 import Encuestas from '../components/Encuestas';
 import Perfil from '../components/Perfil';
 import Usuarios from '../components/Usuarios';
-import Preguntas from '../components/Preguntas';
 import Dashboard from '../components/Dashboard';
 import MisEncuestas from '../components/MisEncuestas';
 import Encuestasignada from '../components/Encuestasignada';

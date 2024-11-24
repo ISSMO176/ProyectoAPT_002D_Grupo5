@@ -20,25 +20,31 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
-        <div className="navbar-left">
-          <Link to="/" className="navbar-logo">
+        <div className="navbar-logo-container">
+          <Link to="/" className="navbar-logo" onClick={closeMenu}>
             <img src="/logo_salfa.jpg" alt="Logo" className="logo" />
           </Link>
         </div>
         <div className={`navbar-links ${isMenuOpen ? 'active' : ''}`}>
-          <Link to="/encuestas" className="nav-link">Encuestas</Link>
-          <Link to="/areas" className="nav-link">Áreas</Link>
-          <Link to="/misencuestas" className="nav-link">Mis Encuestas</Link>
-          <Link to="/asignarencuestas" className="nav-link">Asignar Encuestas</Link>
+          <Link to="/encuestas" className="nav-link" onClick={closeMenu}>Encuestas</Link>
+          <Link to="/areas" className="nav-link" onClick={closeMenu}>Áreas</Link>
+          <Link to="/misencuestas" className="nav-link" onClick={closeMenu}>Mis Encuestas</Link>
+          <Link to="/asignarencuestas" className="nav-link" onClick={closeMenu}>Asignar Encuestas</Link>
+          <Link to="/usuarios" className="nav-link" onClick={closeMenu}>Usuarios</Link>
+          <Link to="/dashboard" className="nav-link" onClick={closeMenu}>Dashboard</Link>
         </div>
         <div className="navbar-right">
           <button className="icon-button" aria-label="Notificaciones">
             <Bell size={20} />
           </button>
-          <Link to="/perfil" className="icon-button" aria-label="Perfil de usuario">
+          <Link to="/perfil" className="icon-button" aria-label="Perfil de usuario" onClick={closeMenu}>
             <User size={20} />
           </Link>
           <button className="icon-button menu-toggle" onClick={toggleMenu} aria-label="Menú">

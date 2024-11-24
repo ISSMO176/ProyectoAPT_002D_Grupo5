@@ -1,15 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Plus, Pencil, Search } from 'lucide-react'
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 const Roles = () => {
   const [roles, setRoles] = useState([]);
-  const [nombreRol, setNombreRol] = useState(''); // Para almacenar el nombre del nuevo rol
-  const [editingRol, setEditingRol] = useState(null); // Para manejar el rol que se está editando
-  const [error, setError] = useState(null); // Para manejar errores
-  const [successMessage, setSuccessMessage] = useState(null); // Para manejar mensajes de éxito
+  const [nombreRol, setNombreRol] = useState('');
+  const [editingRol, setEditingRol] = useState(null);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    fetchRoles(); // Cargar roles al inicio
+    fetchRoles();
   }, []);
 
   const fetchRoles = async () => {
@@ -22,32 +33,20 @@ const Roles = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este rol?')) {
-      try {
-        await axios.delete(`http://localhost:4000/api/roles/${id}`);
-        setSuccessMessage('Rol eliminado con éxito!');
-        fetchRoles(); // Refrescar la lista de roles después de eliminar
-      } catch (error) {
-        console.error('Error deleting role:', error);
-        setError('Error al eliminar el rol');
-      }
-    }
-  };
-
   const handleCreateOrUpdateRole = async (e) => {
-    e.preventDefault(); // Prevenir el comportamiento por defecto del formulario
+    e.preventDefault();
     try {
       if (editingRol) {
         const response = await axios.put(`http://localhost:4000/api/roles/${editingRol.id_rol}`, { nombre_rol: nombreRol });
         setRoles(roles.map((rol) => (rol.id_rol === editingRol.id_rol ? response.data : rol)));
       } else {
         const response = await axios.post('http://localhost:4000/api/roles', { nombre_rol: nombreRol });
-        setRoles([...roles, response.data]); // Agregar el nuevo rol a la lista
+        setRoles([...roles, response.data]);
       }
-      setNombreRol(''); // Limpiar el input después de crear o editar
-      setEditingRol(null); // Resetear el rol que se está editando
-      setSuccessMessage(editingRol ? 'Rol actualizado con éxito!' : 'Rol creado con éxito!'); // Mensaje de éxito
+      setNombreRol('');
+      setEditingRol(null);
+      setIsDialogOpen(false);
+      setSuccessMessage(editingRol ? 'Rol actualizado con éxito!' : 'Rol creado con éxito!');
     } catch (error) {
       console.error('Error creating/updating role:', error);
       setError('Error al crear/actualizar el rol');
@@ -56,61 +55,101 @@ const Roles = () => {
 
   const handleEdit = (rol) => {
     setNombreRol(rol.nombre_rol);
-    setEditingRol(rol); // Establecer el rol que se está editando
+    setEditingRol(rol);
+    setIsDialogOpen(true);
   };
 
+  const filteredRoles = roles.filter(rol => 
+    rol.nombre_rol.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="container mx-auto mt-5 p-4">
-      <h1 className="text-2xl font-bold mb-4">Listado de Roles</h1>
+    <div className="container mx-auto px-4 py-8">
+      <Card className="w-full max-w-4xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Gestión de Roles</CardTitle>
+          <CardDescription>Administre los roles del sistema</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          {successMessage && (
+            <Alert className="mb-4">
+              <AlertTitle>Éxito</AlertTitle>
+              <AlertDescription>{successMessage}</AlertDescription>
+            </Alert>
+          )}
 
-      {error && <div className="alert alert-danger">{error}</div>}
-      {successMessage && <div className="alert alert-success">{successMessage}</div>}
-
-      {/* Formulario para crear o editar un rol */}
-      <form onSubmit={handleCreateOrUpdateRole} className="mb-4 d-flex align-items-center">
-        <input
-          type="text"
-          className="form-control me-2"
-          placeholder="Nombre del rol"
-          value={nombreRol}
-          onChange={(e) => setNombreRol(e.target.value)}
-          required
-        />
-        <button className="btn btn-success" type="submit">
-          {editingRol ? 'Actualizar Rol' : 'Agregar Rol'}
-        </button>
-      </form>
-
-      {/* Tabla para mostrar los roles */}
-      <div className="overflow-x-auto">
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {roles.map((rol) => (
-              <tr key={rol.id_rol} className="hover:bg-gray-100">
-                <td>{rol.id_rol}</td>
-                <td>{rol.nombre_rol}</td>
-                <td>
-                  <div className="d-flex justify-content-between">
-                    <button onClick={() => handleEdit(rol)} className="btn btn-warning me-2">
-                      Editar
-                    </button>
-                    <button onClick={() => handleDelete(rol.id_rol)} className="btn btn-danger">
-                      Eliminar
-                    </button>
+          <div className="flex justify-between items-center mb-6">
+            <div className="relative w-64">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar roles..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Agregar Rol
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{editingRol ? 'Editar Rol' : 'Agregar Nuevo Rol'}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleCreateOrUpdateRole} className="space-y-4">
+                  <div>
+                    <Label htmlFor="nombre-rol">Nombre del Rol</Label>
+                    <Input
+                      id="nombre-rol"
+                      value={nombreRol}
+                      onChange={(e) => setNombreRol(e.target.value)}
+                      placeholder="Ingrese el nombre del rol"
+                      required
+                    />
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  <Button type="submit" className="w-full">
+                    {editingRol ? 'Actualizar' : 'Crear'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">ID</TableHead>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRoles.map((rol) => (
+                  <TableRow key={rol.id_rol}>
+                    <TableCell className="font-medium">{rol.id_rol}</TableCell>
+                    <TableCell>{rol.nombre_rol}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(rol)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

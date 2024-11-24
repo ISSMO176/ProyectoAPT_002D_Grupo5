@@ -16,11 +16,11 @@ export const login = async (req, res) => {
   try {
     const usuario = await prisma.usuario.findUnique({
       where: { rut },
-      include: { rol: true }, // Incluye el rol del usuario
+      include: { rol: true },
     });
 
-    if (!usuario) {
-      return res.status(401).json({ error: 'Usuario no encontrado' });
+    if (!usuario || !usuario.activo) {
+      return res.status(401).json({ error: 'Usuario no habilitado o no encontrado' });
     }
 
     const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena);
@@ -28,7 +28,6 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
-    // Genera un token con el rol incluido
     const token = jwt.sign(
       { rut: usuario.rut, rol: usuario.rol.nombre_rol },
       process.env.JWT_SECRET,
@@ -45,20 +44,19 @@ export const login = async (req, res) => {
 export const cambiarEstadoUsuario = async (req, res) => {
   const { rut } = req.params;
   const { activo } = req.body;
-  
-  console.log(`Cambiando estado de usuario con RUT ${rut} a ${activo}`); 
 
   try {
     const usuarioModificado = await prisma.usuario.update({
       where: { rut },
       data: { activo },
     });
-    res.status(200).json(usuarioModificado);
+    res.status(200).json({ message: `Usuario ${activo ? 'habilitado' : 'deshabilitado'} correctamente.` });
   } catch (error) {
     console.error('Error al cambiar el estado del usuario:', error);
     res.status(500).json({ error: 'Error al cambiar el estado del usuario' });
   }
 };
+
 
 export const obtenerUsuarios = async (req, res) => {
   try {

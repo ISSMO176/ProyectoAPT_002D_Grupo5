@@ -1,9 +1,8 @@
 .navbar {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 1000;
+  height: var(--navbar-height); /* Altura dinámica */
   transition: all 0.3s ease-in-out;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -11,7 +10,7 @@
 
 .navbar-container {
   display: flex;
-  justify-content: space-between; /* Esto alinea los elementos a los extremos */
+  justify-content: space-between;
   align-items: center;
   padding: 0.5rem 1rem;
   max-width: 1200px;
@@ -91,16 +90,20 @@
 }
 
 @media (max-width: 767px) {
+  .navbar {
+    height: var(--navbar-height);
+  }
+
   .navbar-container {
     padding: 0.5rem;
   }
 
   .navbar-left {
-    flex-grow: 0; /* Asegura que solo el logo ocupe espacio a la izquierda */
+    flex-grow: 0;
   }
 
   .navbar-right {
-    margin-left: auto; /* Esto empuja los botones e iconos a la derecha */
+    margin-left: auto;
   }
 
   .icon-button {

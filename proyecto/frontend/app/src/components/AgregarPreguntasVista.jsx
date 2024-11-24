@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { PlusCircle, Pencil, Trash2 } from 'lucide-react'
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const AgregarPreguntasVista = () => {
   const { id } = useParams();
@@ -82,95 +90,99 @@ const AgregarPreguntasVista = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2 className="text-center mb-4">Agregar Preguntas a {encuesta?.titulo}</h2>
+    <div className="container mx-auto px-4 py-8">
+      <h2 className="text-2xl font-bold mb-6 text-center">Agregar Preguntas a {encuesta?.titulo}</h2>
 
-      <form onSubmit={handleAgregarPregunta} className="mb-4 p-4 border rounded shadow-sm">
-        <div className="mb-3">
-          <label className="form-label">Texto de la Pregunta</label>
-          <input
-            type="text"
-            className="form-control"
-            value={textoPregunta}
-            onChange={(e) => setTextoPregunta(e.target.value)}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Tipo de Respuesta</label>
-          <select
-            className="form-select"
-            value={tipoRespuesta}
-            onChange={(e) => setTipoRespuesta(e.target.value)}
-          >
-            <option value="texto">Texto libre</option>
-            <option value="multiple">Opción múltiple</option>
-          </select>
-        </div>
-
-        {tipoRespuesta === 'multiple' && (
-          <div className="mb-3">
-            <label className="form-label">Opciones</label>
-            {opciones.map((opcion, index) => (
-              <input
-                key={index}
-                type="text"
-                className="form-control mb-2"
-                value={opcion}
-                onChange={(e) => handleOptionChange(index, e.target.value)}
-                placeholder={`Opción ${index + 1}`}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Agregar Nueva Pregunta</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleAgregarPregunta} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="textoPregunta">Texto de la Pregunta</Label>
+              <Input
+                id="textoPregunta"
+                value={textoPregunta}
+                onChange={(e) => setTextoPregunta(e.target.value)}
+                placeholder="Escribe la pregunta aquí"
               />
-            ))}
-            <button type="button" className="btn btn-secondary mt-2" onClick={handleAddOption}>
-              Agregar Opción
-            </button>
-          </div>
-        )}
+            </div>
 
-        <button type="submit" className="btn btn-primary w-100">
-          {editando ? 'Actualizar Pregunta' : 'Agregar Pregunta'}
-        </button>
-      </form>
+            <div className="space-y-2">
+              <Label htmlFor="tipoRespuesta">Tipo de Respuesta</Label>
+              <Select value={tipoRespuesta} onValueChange={setTipoRespuesta}>
+                <SelectTrigger id="tipoRespuesta">
+                  <SelectValue placeholder="Selecciona el tipo de respuesta" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="texto">Texto libre</SelectItem>
+                  <SelectItem value="multiple">Opción múltiple</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-      <h4 className="mb-4">Vista Previa de las Preguntas</h4>
-      <div className="list-group">
+            {tipoRespuesta === 'multiple' && (
+              <div className="space-y-2">
+                <Label>Opciones</Label>
+                {opciones.map((opcion, index) => (
+                  <Input
+                    key={index}
+                    value={opcion}
+                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                    placeholder={`Opción ${index + 1}`}
+                    className="mb-2"
+                  />
+                ))}
+                <Button type="button" variant="outline" className="w-full" onClick={handleAddOption}>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Agregar Opción
+                </Button>
+              </div>
+            )}
+
+            <Button type="submit" className="w-full">
+              {editando ? 'Actualizar Pregunta' : 'Agregar Pregunta'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <h3 className="text-xl font-semibold mb-4">Vista Previa de las Preguntas</h3>
+      <div className="space-y-4">
         {preguntas.length > 0 ? (
           preguntas.map((pregunta, index) => (
-            <div key={pregunta.id_pregunta} className="mb-3 list-group-item shadow-sm">
-              <div className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-3">{index + 1}. {pregunta.texto_pregunta}</h5>
-                <div>
-                  <button 
-                    className="btn btn-warning btn-sm me-2" 
-                    onClick={() => handleEditarPregunta(pregunta)}
-                  >
-                    Editar
-                  </button>
-                  <button 
-                    className="btn btn-danger btn-sm" 
-                    onClick={() => handleEliminarPregunta(pregunta.id_pregunta)}
-                  >
-                    Eliminar
-                  </button>
+            <Card key={pregunta.id_pregunta}>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {index + 1}. {pregunta.texto_pregunta}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {pregunta.tipo_respuesta === 'multiple' ? (
+                  <RadioGroup>
+                    {pregunta.opciones.map((opcion) => (
+                      <div key={opcion.id_opcion} className="flex items-center space-x-2">
+                        <RadioGroupItem value={opcion.id_opcion.toString()} id={`option-${opcion.id_opcion}`} />
+                        <Label htmlFor={`option-${opcion.id_opcion}`}>{opcion.texto_opcion}</Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                ) : (
+                  <Input disabled placeholder="Respuesta de texto libre" />
+                )}
+                <div className="flex justify-end space-x-2 mt-4">
+                  <Button variant="outline" size="sm" onClick={() => handleEditarPregunta(pregunta)}>
+                    <Pencil className="mr-2 h-4 w-4" /> Editar
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => handleEliminarPregunta(pregunta.id_pregunta)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                  </Button>
                 </div>
-              </div>
-              {pregunta.tipo_respuesta === 'multiple' ? (
-                <ul className="list-unstyled ps-3">
-                  {pregunta.opciones.map(opcion => (
-                    <li key={opcion.id_opcion} className="mb-1">
-                      <i className="bi bi-dot me-2"></i>{opcion.texto_opcion}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="border p-3 bg-light rounded">
-                  <p className="mb-0 text-muted">Tipo de respuesta: Texto libre</p>
-                </div>
-              )}
-            </div>
+              </CardContent>
+            </Card>
           ))
         ) : (
-          <p className="text-muted">No hay preguntas agregadas todavía.</p>
+          <p className="text-muted-foreground">No hay preguntas agregadas todavía.</p>
         )}
       </div>
     </div>
