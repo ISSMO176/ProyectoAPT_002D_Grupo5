@@ -87,7 +87,7 @@ const AppRouter = () => {
       <Route
         path="/agregar-preguntas/:id"
         element={
-          <ProtectedRoute allowedRoles={['administrador']}>
+          <ProtectedRoute allowedRoles={['administrador']}>a
             <><Navbar /><AgregarPreguntasVista /></>
           </ProtectedRoute>
         }
