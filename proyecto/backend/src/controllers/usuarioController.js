@@ -31,7 +31,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { rut: usuario.rut, rol: usuario.rol.nombre_rol },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '24h' }
     );
 
     res.json({ token });
@@ -73,15 +73,32 @@ export const obtenerUsuarios = async (req, res) => {
   }
 };
 
+const validarRUT = (rut) => {
+  const rutRegex = /^[0-9]+-[0-9Kk]$/;
+  if (!rutRegex.test(rut)) return false;
+
+  const [numeros, digitoVerificador] = rut.split('-');
+  let suma = 0;
+  let multiplicador = 2;
+
+  for (let i = numeros.length - 1; i >= 0; i--) {
+    suma += parseInt(numeros[i]) * multiplicador;
+    multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+  }
+
+  const dvCalculado = 11 - (suma % 11);
+  const dv = dvCalculado === 11 ? '0' : dvCalculado === 10 ? 'K' : dvCalculado.toString();
+
+  return dv === digitoVerificador.toUpperCase();
+};
+
 // Crear nuevo usuario
 export const crearUsuario = async (req, res) => {
   const { rut, nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
 
-  // Validar que todos los campos estén presentes
-  if (!rut || !nombre || !apellido_paterno || !correo || !contrasena || !rolId || !areaId_area) {
-    return res.status(400).json({ error: 'Faltan datos requeridos' });
+  if (!validarRUT(rut)) {
+    return res.status(400).json({ error: 'RUT inválido' });
   }
-
   try {
     const contrasenaEncriptada = await bcrypt.hash(contrasena, 10);
     const nuevoUsuario = await prisma.usuario.create({
@@ -91,7 +108,7 @@ export const crearUsuario = async (req, res) => {
         apellido_paterno,
         apellido_materno,
         correo,
-        contrasena: contrasenaEncriptada, // Usar la contraseña encriptada
+        contrasena: contrasenaEncriptada,
         rolId,
         areaId_area,
       },
@@ -121,13 +138,11 @@ export const modificarUsuario = async (req, res) => {
       apellido_materno,
       correo,
     };
-
     // Si se envía una nueva contraseña, encriptarla y añadirla
     if (contrasena) {
       const nuevaContrasenaEncriptada = await bcrypt.hash(contrasena, 10);
       data.contrasena = nuevaContrasenaEncriptada;
     }
-
     // Actualizar los datos del usuario
     const usuarioModificado = await prisma.usuario.update({
       where: { rut },
@@ -226,13 +241,6 @@ export const actualizarPerfil = async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar el perfil', details: error.message });
   }
 };
-
-
-
-  
-
-
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
