@@ -8,37 +8,60 @@ export const asignarEncuesta = async (req, res) => {
     try {
         let usuariosAsignar = [];
 
+        // Obtener usuarios desde usuarioIds o desde un área específica
         if (usuarioIds && usuarioIds.length > 0) {
             usuariosAsignar = usuarioIds;
         } else if (areaId) {
             const usuariosEnArea = await prisma.usuario.findMany({
                 where: { areaId_area: parseInt(areaId) },
-                select: { rut: true }
+                select: { rut: true },
             });
-            usuariosAsignar = usuariosEnArea.map(usuario => usuario.rut);
+            usuariosAsignar = usuariosEnArea.map((usuario) => usuario.rut);
         }
 
         if (usuariosAsignar.length === 0) {
-            return res.status(400).json({ error: 'No se seleccionaron usuarios ni área' });
+            return res.status(400).json({ error: "No se seleccionaron usuarios ni área." });
         }
 
+        // Validar usuarios para evitar duplicados
+        const usuariosValidos = [];
+        for (const usuarioId of usuariosAsignar) {
+            const existeAsignacion = await prisma.encuestaAsignada.findFirst({
+                where: {
+                    encuestaId: parseInt(encuestaId),
+                    usuarioId,
+                },
+            });
+
+            if (!existeAsignacion) {
+                usuariosValidos.push(usuarioId);
+            }
+        }
+
+        if (usuariosValidos.length === 0) {
+            return res.status(400).json({
+                error: "La encuesta ya está asignada a todos los usuarios seleccionados.",
+            });
+        }
+
+        // Crear asignaciones solo para usuarios válidos
         const asignaciones = await Promise.all(
-            usuariosAsignar.map(usuarioId =>
+            usuariosValidos.map((usuarioId) =>
                 prisma.encuestaAsignada.create({
                     data: {
                         encuestaId: parseInt(encuestaId),
                         usuarioId,
                         estado,
-                        fecha_asignacion
-                    }
+                        fecha_asignacion,
+                    },
                 })
             )
         );
 
-        res.json(asignaciones);
+        res.status(201).json({ message: "Encuestas asignadas con éxito.", asignaciones });
     } catch (error) {
-        console.error('Error al asignar la encuesta:', error);
-        res.status(500).json({ error: 'Error al asignar la encuesta', details: error.message });
+        console.error("Error al asignar la encuesta:", error);
+        res.status(500).json({ error: "Error al asignar la encuesta.", details: error.message });
     }
 };
 

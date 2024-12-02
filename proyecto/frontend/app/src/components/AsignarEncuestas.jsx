@@ -93,26 +93,35 @@ const AsignarEncuestas = () => {
             alert("Seleccione una encuesta para asignar.");
             return;
         }
-
-        // Para filtrar solo los usuarios seleccionados manualmente
-        const usuarioIdsSeleccionados = Object.keys(usuariosSeleccionados)
-            .filter(rut => usuariosSeleccionados[rut]);
-
+    
+        const usuarioIdsSeleccionados = Object.keys(usuariosSeleccionados).filter(
+            (rut) => usuariosSeleccionados[rut]
+        );
+    
         if (usuarioIdsSeleccionados.length === 0) {
             alert("Seleccione al menos un usuario para asignar la encuesta.");
             return;
         }
-
+    
         try {
-            await axios.post('http://localhost:4000/api/encuestasAsignada/asignar', {
+            // Llama al backend para asignar la encuesta
+            const response = await axios.post('http://localhost:4000/api/encuestasAsignada/asignar', {
                 encuestaId: parseInt(encuestaId),
                 usuarioIds: usuarioIdsSeleccionados,
                 areaId: areaId || null,
             });
-            alert('Encuesta asignada con éxito');
+    
+            // Mostrar mensaje de éxito
+            alert(response.data.message || "Encuesta asignada con éxito.");
         } catch (error) {
-            console.error('Error al asignar encuesta', error);
-            alert('Error al asignar encuesta');
+            console.error("Error al asignar encuesta:", error);
+    
+            // Mostrar error del backend si existe
+            if (error.response?.data?.error) {
+                alert(error.response.data.error);
+            } else {
+                alert("Error al asignar encuesta. Intente nuevamente.");
+            }
         }
     };
 

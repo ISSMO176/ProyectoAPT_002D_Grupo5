@@ -7,7 +7,6 @@ import Perfil from '../components/Perfil';
 import Usuarios from '../components/Usuarios';
 import Dashboard from '../components/Dashboard';
 import MisEncuestas from '../components/MisEncuestas';
-import Encuestasignada from '../components/Encuestasignada';
 import AsignarEncuestas from '../components/AsignarEncuestas';
 import AgregarPreguntasVista from '../components/AgregarPreguntasVista';
 import CrearEncuesta from '../components/CrearEncuesta';
@@ -64,14 +63,6 @@ const AppRouter = () => {
         element={
           <ProtectedRoute allowedRoles={['administrador']}>
             <><Navbar /><Dashboard /></>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/encuestasignada"
-        element={
-          <ProtectedRoute allowedRoles={['administrador']}>
-            <><Navbar /><Encuestasignada /></>
           </ProtectedRoute>
         }
       />

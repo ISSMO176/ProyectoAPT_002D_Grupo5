@@ -63,19 +63,24 @@ const Usuarios = () => {
     setFormVisible(true);
   };
 
-  const handleGuardarUsuario = async (usuario) => {
-    try {
-      if (usuarioEditado) {
-        await axios.put(`http://localhost:4000/api/usuarios/${usuarioEditado.rut}`, usuario);
-      } else {
-        await axios.post('http://localhost:4000/api/usuarios', usuario);
+const handleGuardarUsuario = async (usuario) => {
+  try {
+    if (usuarioEditado) {
+      await axios.put(`http://localhost:4000/api/usuarios/${usuarioEditado.rut}`, usuario);
+    } else {
+      if (!usuario.rut || !usuario.nombre || !usuario.apellido_paterno || !usuario.correo || !usuario.contrasena || !usuario.rolId || !usuario.areaId_area) {
+        alert('Todos los campos son obligatorios');
+        return;
       }
-      setFormVisible(false);
-      obtenerUsuarios();
-    } catch (error) {
-      console.error('Error al guardar el usuario', error);
+      await axios.post('http://localhost:4000/api/usuarios', usuario);
     }
-  };
+    setFormVisible(false);
+    obtenerUsuarios();
+  } catch (error) {
+    console.error('Error al guardar el usuario:', error);
+    alert(`Error al guardar el usuario: ${error.response?.data?.error || 'Error desconocido'}`);
+  }
+};
 
   const handleCambiarEstadoUsuario = async () => {
     if (!usuarioDeshabilitar) return;
