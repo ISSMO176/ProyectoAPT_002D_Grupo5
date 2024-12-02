@@ -28,7 +28,7 @@ router.put('/:rut', modificarUsuario);
 // Eliminar un usuario
 router.delete('/:rut', eliminarUsuario);
 
-router.post('/login', login); // Agregar la ruta de login
+router.post('/login', login);
 
 router.post('/cargar-excel', upload.single('file'), cargarUsuariosDesdeExcel);
 router.get('/perfil', authMiddleware, obtenerPerfil);

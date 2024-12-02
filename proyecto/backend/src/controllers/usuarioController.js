@@ -10,6 +10,28 @@ import { fileURLToPath } from 'url';
 const prisma = new PrismaClient();
 
 
+const validarCorreo = (correo) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
+const validarContrasena = (contrasena) => contrasena.length >= 8;
+
+const validarRUT = (rut) => {
+  const rutRegex = /^[0-9]+-[0-9Kk]$/;
+  if (!rutRegex.test(rut)) return false;
+
+  const [numeros, digitoVerificador] = rut.split('-');
+  let suma = 0;
+  let multiplicador = 2;
+
+  for (let i = numeros.length - 1; i >= 0; i--) {
+    suma += parseInt(numeros[i]) * multiplicador;
+    multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+  }
+
+  const dvCalculado = 11 - (suma % 11);
+  const dv = dvCalculado === 11 ? '0' : dvCalculado === 10 ? 'K' : dvCalculado.toString();
+
+  return dv === digitoVerificador.toUpperCase();
+};
+
 export const login = async (req, res) => {
   const { rut, contrasena } = req.body;
 
@@ -31,7 +53,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { rut: usuario.rut, rol: usuario.rol.nombre_rol },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '24h' }
     );
 
     res.json({ token });
@@ -73,13 +95,21 @@ export const obtenerUsuarios = async (req, res) => {
   }
 };
 
+
 // Crear nuevo usuario
 export const crearUsuario = async (req, res) => {
   const { rut, nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
 
-  // Validar que todos los campos estén presentes
-  if (!rut || !nombre || !apellido_paterno || !correo || !contrasena || !rolId || !areaId_area) {
-    return res.status(400).json({ error: 'Faltan datos requeridos' });
+  if (!validarRUT(rut)) {
+    return res.status(400).json({ error: 'RUT inválido' });
+  }
+
+  if (!validarCorreo(correo)) {
+    return res.status(400).json({ error: 'Correo inválido' });
+  }
+
+  if (!validarContrasena(contrasena)) {
+    return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
   }
 
   try {
@@ -91,7 +121,7 @@ export const crearUsuario = async (req, res) => {
         apellido_paterno,
         apellido_materno,
         correo,
-        contrasena: contrasenaEncriptada, // Usar la contraseña encriptada
+        contrasena: contrasenaEncriptada,
         rolId,
         areaId_area,
       },
@@ -121,13 +151,11 @@ export const modificarUsuario = async (req, res) => {
       apellido_materno,
       correo,
     };
-
     // Si se envía una nueva contraseña, encriptarla y añadirla
     if (contrasena) {
       const nuevaContrasenaEncriptada = await bcrypt.hash(contrasena, 10);
       data.contrasena = nuevaContrasenaEncriptada;
     }
-
     // Actualizar los datos del usuario
     const usuarioModificado = await prisma.usuario.update({
       where: { rut },
@@ -226,13 +254,6 @@ export const actualizarPerfil = async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar el perfil', details: error.message });
   }
 };
-
-
-
-  
-
-
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -255,20 +276,22 @@ export const cargarUsuariosDesdeExcel = async (req, res) => {
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet);
 
-    const usuarios = data.map((row) => ({
-      rut: row.rut,
-      nombre: row.nombre,
-      apellido_paterno: row.apellido_paterno,
-      apellido_materno: row.apellido_materno,
-      correo: row.correo,
-      contrasena: row.contrasena,
-      rolId: parseInt(row.rolId),
-      areaId_area: row.areaId_area ? parseInt(row.areaId_area) : null,
-    }));
+    const usuarios = data.map((row) => {
+      if (!validarRUT(row.rut) || !validarCorreo(row.correo) || !validarContrasena(row.contrasena)) {
+        throw new Error(`Datos inválidos para el usuario: ${row.nombre}`);
+      }
 
-    for (const usuario of usuarios) {
-      usuario.contrasena = await bcrypt.hash(usuario.contrasena, 10);
-    }
+      return {
+        rut: row.rut,
+        nombre: row.nombre,
+        apellido_paterno: row.apellido_paterno,
+        apellido_materno: row.apellido_materno,
+        correo: row.correo,
+        contrasena: bcrypt.hashSync(row.contrasena, 10),
+        rolId: parseInt(row.rolId),
+        areaId_area: row.areaId_area ? parseInt(row.areaId_area) : null,
+      };
+    });
 
     const nuevosUsuarios = await prisma.usuario.createMany({
       data: usuarios,
@@ -278,7 +301,7 @@ export const cargarUsuariosDesdeExcel = async (req, res) => {
     res.status(201).json({ message: 'Usuarios creados correctamente', nuevosUsuarios });
   } catch (error) {
     console.error('Error al cargar usuarios desde Excel:', error);
-    res.status(500).json({ error: 'Error al cargar usuarios desde Excel' });
+    res.status(500).json({ error: 'Error al cargar usuarios desde Excel', details: error.message });
   } finally {
     fs.unlink(filePath, (err) => {
       if (err) console.error('Error al eliminar el archivo:', err);

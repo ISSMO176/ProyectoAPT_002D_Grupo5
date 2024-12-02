@@ -10,8 +10,33 @@ const Login = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    // Función para validar el formato del RUT
+    const validarRUT = (rut) => {
+        const rutRegex = /^[0-9]{7,8}-[0-9Kk]$/;
+        if (!rutRegex.test(rut)) return false;
+
+        const [numeros, dv] = rut.split('-');
+        let suma = 0;
+        let multiplicador = 2;
+
+        for (let i = numeros.length - 1; i >= 0; i--) {
+            suma += parseInt(numeros[i]) * multiplicador;
+            multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+        }
+        const resto = suma % 11;
+        const dvCalculado = resto === 0 ? '0' : resto === 1 ? 'K' : (11 - resto).toString();
+        return dvCalculado.toUpperCase() === dv.toUpperCase();
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
+        
+        // Validar RUT antes de hacer la solicitud
+        if (!validarRUT(rut)) {
+            setError('El RUT ingresado es inválido');
+            return;
+        }
+
         try {
             const response = await axios.post('http://localhost:4000/api/usuarios/login', { rut, contrasena });
             localStorage.setItem('token', response.data.token);
@@ -21,7 +46,8 @@ const Login = () => {
             const mensajeError = error.response?.data?.error || 'Credenciales incorrectas';
             setError(mensajeError);
         }
-        };
+    };
+
     return (
         <div className="login-page">
             <div className="image-side">
