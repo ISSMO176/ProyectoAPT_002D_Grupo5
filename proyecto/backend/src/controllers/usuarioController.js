@@ -8,8 +8,6 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const prisma = new PrismaClient();
-
-
 const validarCorreo = (correo) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 const validarContrasena = (contrasena) => contrasena.length >= 8;
 
@@ -96,24 +94,38 @@ export const obtenerUsuarios = async (req, res) => {
 };
 
 
-// Crear nuevo usuario
 export const crearUsuario = async (req, res) => {
   const { rut, nombre, apellido_paterno, apellido_materno, correo, contrasena, rolId, areaId_area } = req.body;
-
+  // Validación de RUT
   if (!validarRUT(rut)) {
     return res.status(400).json({ error: 'RUT inválido' });
   }
-
+  // Validación de correo
   if (!validarCorreo(correo)) {
-    return res.status(400).json({ error: 'Correo inválido' });
+    return res.status(400).json({ error: 'Correo electrónico inválido. Debe seguir el formato: ejemplo@dominio.com' });
   }
-
+  // Validación de contraseña
   if (!validarContrasena(contrasena)) {
     return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
   }
-
   try {
+    // Verificar si el RUT ya está registrado
+    const usuarioExistente = await prisma.usuario.findUnique({
+      where: { rut }
+    });
+    if (usuarioExistente) {
+      return res.status(400).json({ error: 'RUT ya registrado' });
+    }
+    // Verificar si el correo ya está registrado
+    const correoExistente = await prisma.usuario.findUnique({
+      where: { correo }
+    });
+    if (correoExistente) {
+      return res.status(400).json({ error: 'Correo ya registrado' });
+    }
+    // Encriptar la contraseña
     const contrasenaEncriptada = await bcrypt.hash(contrasena, 10);
+    // Crear el nuevo usuario en la base de datos
     const nuevoUsuario = await prisma.usuario.create({
       data: {
         rut,
@@ -126,6 +138,7 @@ export const crearUsuario = async (req, res) => {
         areaId_area,
       },
     });
+    // Responder con el nuevo usuario
     res.status(201).json(nuevoUsuario);
   } catch (error) {
     console.error('Error al crear el usuario:', error);
@@ -137,57 +150,35 @@ export const crearUsuario = async (req, res) => {
 export const modificarUsuario = async (req, res) => {
   const { rut } = req.params; // El RUT proviene de los parámetros de la ruta
   const { nombre, apellido_paterno, apellido_materno, correo, contrasena } = req.body;
-
   // Validar que los campos requeridos estén presentes
   if (!nombre || !apellido_paterno || !correo) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
-
   try {
-    // Crear un objeto con los datos a actualizar
     const data = {
       nombre,
       apellido_paterno,
       apellido_materno,
       correo,
     };
-    // Si se envía una nueva contraseña, encriptarla y añadirla
     if (contrasena) {
       const nuevaContrasenaEncriptada = await bcrypt.hash(contrasena, 10);
       data.contrasena = nuevaContrasenaEncriptada;
     }
-    // Actualizar los datos del usuario
     const usuarioModificado = await prisma.usuario.update({
       where: { rut },
       data,
     });
-
     res.status(200).json(usuarioModificado);
   } catch (error) {
     console.error('Error al modificar el usuario:', error);
     res.status(500).json({ error: 'Error al modificar el usuario', details: error.message });
   }
 };
-// Eliminar usuario
-export const eliminarUsuario = async (req, res) => {
-  const { rut } = req.params;
-
-  try {
-    await prisma.usuario.delete({
-      where: { rut },
-    });
-    res.status(200).json({ message: 'Usuario eliminado' });
-  } catch (error) {
-    console.error('Error al eliminar el usuario:', error);
-    res.status(500).json({ error: 'Error al eliminar el usuario', details: error.message });
-  }
-};
-
-
 export const obtenerPerfil = async (req, res) => {
   try {
     const usuario = await prisma.usuario.findUnique({
-      where: { rut: req.user.rut }, // Usamos el RUT desde el token
+      where: { rut: req.user.rut },
       select: {
         rut: true,
         nombre: true,
@@ -217,16 +208,13 @@ export const obtenerPerfil = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener el perfil', details: error.message });
   }
 };
-
 // Actualizar perfil del usuario
 export const actualizarPerfil = async (req, res) => {
   const { nombre, apellido_paterno, apellido_materno, correo, contrasenaNueva } = req.body;
-  
   // Validar que los campos requeridos estén presentes
   if (!nombre || !apellido_paterno || !correo) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
-
   try {
     // Crea el objeto de datos que será actualizado
     const data = {
@@ -235,19 +223,16 @@ export const actualizarPerfil = async (req, res) => {
       apellido_materno,
       correo,
     };
-
     // Si se envía una nueva contraseña, encriptarla y añadirla
     if (contrasenaNueva) {
       const nuevaContrasenaEncriptada = await bcrypt.hash(contrasenaNueva, 10);
       data.contrasena = nuevaContrasenaEncriptada;
     }
-
     // Actualiza el usuario en la base de datos usando el RUT del token
     const usuarioModificado = await prisma.usuario.update({
       where: { rut: req.user.rut },
       data,
     });
-
     res.status(200).json(usuarioModificado);
   } catch (error) {
     console.error('Error al actualizar el perfil:', error);
@@ -256,7 +241,6 @@ export const actualizarPerfil = async (req, res) => {
 };
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.resolve(__dirname, '../../uploads'));
@@ -266,21 +250,17 @@ const storage = multer.diskStorage({
   },
 });
 export const upload = multer({ storage });
-
 export const cargarUsuariosDesdeExcel = async (req, res) => {
   const filePath = req.file.path;
-
   try {
     const workbook = xlsx.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet);
-
     const usuarios = data.map((row) => {
       if (!validarRUT(row.rut) || !validarCorreo(row.correo) || !validarContrasena(row.contrasena)) {
         throw new Error(`Datos inválidos para el usuario: ${row.nombre}`);
       }
-
       return {
         rut: row.rut,
         nombre: row.nombre,
@@ -292,12 +272,10 @@ export const cargarUsuariosDesdeExcel = async (req, res) => {
         areaId_area: row.areaId_area ? parseInt(row.areaId_area) : null,
       };
     });
-
     const nuevosUsuarios = await prisma.usuario.createMany({
       data: usuarios,
       skipDuplicates: true,
     });
-
     res.status(201).json({ message: 'Usuarios creados correctamente', nuevosUsuarios });
   } catch (error) {
     console.error('Error al cargar usuarios desde Excel:', error);
