@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useParams } from 'react-router-dom';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const AsignarEncuestas = () => {
     const [encuestaId, setEncuestaId] = useState('');
@@ -19,8 +19,6 @@ const AsignarEncuestas = () => {
     const { idEncuesta } = useParams();
     const [searchTerm, setSearchTerm] = useState('');
     const [seleccionarTodos, setSeleccionarTodos] = useState(false);
-
-    console.log(idEncuesta);
 
     useEffect(() => {
         const fetchUsuarios = async () => {
@@ -56,23 +54,19 @@ const AsignarEncuestas = () => {
     }, []);
 
     useEffect(() => {
-        // Filtrar usuarios por área y búsqueda de nombre
-        let usuariosEnArea = usuarios.filter(usuario => usuario.areaId_area === parseInt(areaId));
-
+        let usuariosEnArea = usuarios.filter((usuario) => usuario.areaId_area === parseInt(areaId));
         if (searchTerm) {
-            usuariosEnArea = usuariosEnArea.filter(usuario =>
+            usuariosEnArea = usuariosEnArea.filter((usuario) =>
                 `${usuario.nombre} ${usuario.apellido_paterno}`
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase())
             );
         }
-
         setUsuariosFiltrados(usuariosEnArea);
 
-        // Reiniciar selección de usuarios al cambiar el área o búsqueda
         const seleccionInicial = {};
-        usuariosEnArea.forEach(usuario => {
-            seleccionInicial[usuario.rut] = seleccionarTodos; // Actualiza según el estado de "Seleccionar todos"
+        usuariosEnArea.forEach((usuario) => {
+            seleccionInicial[usuario.rut] = seleccionarTodos;
         });
         setUsuariosSeleccionados(seleccionInicial);
     }, [areaId, searchTerm, usuarios, seleccionarTodos]);
@@ -85,7 +79,15 @@ const AsignarEncuestas = () => {
     };
 
     const handleSelectAll = () => {
-        setSeleccionarTodos(prevState => !prevState); // Cambia el estado de "Seleccionar todos"
+        const nuevosSeleccionados = {};
+        usuariosFiltrados.forEach((usuario) => {
+            nuevosSeleccionados[usuario.rut] = !seleccionarTodos;
+        });
+        setUsuariosSeleccionados((prevSeleccionados) => ({
+            ...prevSeleccionados,
+            ...nuevosSeleccionados,
+        }));
+        setSeleccionarTodos((prevState) => !prevState);
     };
 
     const handleAsignar = async () => {
@@ -93,35 +95,27 @@ const AsignarEncuestas = () => {
             alert("Seleccione una encuesta para asignar.");
             return;
         }
-    
-        const usuarioIdsSeleccionados = Object.keys(usuariosSeleccionados).filter(
-            (rut) => usuariosSeleccionados[rut]
-        );
-    
+
+        const usuarioIdsSeleccionados = usuariosFiltrados
+            .filter((usuario) => usuariosSeleccionados[usuario.rut])
+            .map((usuario) => usuario.rut);
+
         if (usuarioIdsSeleccionados.length === 0) {
             alert("Seleccione al menos un usuario para asignar la encuesta.");
             return;
         }
-    
+
         try {
-            // Llama al backend para asignar la encuesta
             const response = await axios.post('http://localhost:4000/api/encuestasAsignada/asignar', {
                 encuestaId: parseInt(encuestaId),
                 usuarioIds: usuarioIdsSeleccionados,
                 areaId: areaId || null,
             });
-    
-            // Mostrar mensaje de éxito
+
             alert(response.data.message || "Encuesta asignada con éxito.");
         } catch (error) {
             console.error("Error al asignar encuesta:", error);
-    
-            // Mostrar error del backend si existe
-            if (error.response?.data?.error) {
-                alert(error.response.data.error);
-            } else {
-                alert("Error al asignar encuesta. Intente nuevamente.");
-            }
+            alert(error.response?.data?.error || "Error al asignar encuesta. Intente nuevamente.");
         }
     };
 
@@ -171,7 +165,6 @@ const AsignarEncuestas = () => {
                         </form>
                     </CardContent>
                 </Card>
-
                 <Card>
                     <CardHeader>
                         <CardTitle>Usuarios en el área seleccionada</CardTitle>
