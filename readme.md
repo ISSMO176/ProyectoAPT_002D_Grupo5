@@ -1,4 +1,4 @@
-*Rama para el desarrollo*
+*Rama para el desarrollo de la plataforma completa junto con el modulo de Cursos*
 
 *Pasos para Clonar y probar la plataforma*
 
