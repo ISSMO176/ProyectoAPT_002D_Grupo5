@@ -186,7 +186,7 @@ export default function UsuarioForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="apellido_materno" className="text-sm font-medium">
-              Apellido Materno
+              Apellido Materno (Opcional)
             </Label>
             <Input
               id="apellido_materno"
@@ -215,7 +215,6 @@ export default function UsuarioForm({
             )}
           </div>
         )}
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1.5">
             <Label htmlFor="rol" className="text-sm font-medium">
