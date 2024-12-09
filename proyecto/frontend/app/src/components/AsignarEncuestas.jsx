@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { showAlert, showConfirm } from "../lib/sweetalAlert";
 
 const AsignarEncuestas = () => {
   const [encuestaId, setEncuestaId] = useState("");
@@ -25,6 +26,9 @@ const AsignarEncuestas = () => {
   const { idEncuesta } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [seleccionarTodos, setSeleccionarTodos] = useState(false);
+
+  const [paginaActual, setPaginaActual] = useState(1);
+  const usuariosPorPagina = 10;
 
   useEffect(() => {
     const fetchUsuarios = async () => {
@@ -86,21 +90,31 @@ const AsignarEncuestas = () => {
     }));
   };
 
-  const handleSelectAll = () => {
-    const nuevosSeleccionados = {};
-    usuariosFiltrados.forEach((usuario) => {
-      nuevosSeleccionados[usuario.rut] = !seleccionarTodos;
-    });
-    setUsuariosSeleccionados((prevSeleccionados) => ({
-      ...prevSeleccionados,
-      ...nuevosSeleccionados,
-    }));
-    setSeleccionarTodos((prevState) => !prevState);
+  const handleSelectAll = async () => {
+    const action = seleccionarTodos ? "desmarcar" : "seleccionar";
+    const confirmResult = await showConfirm(
+      `Confirmar ${action} todos`,
+      `¿Está seguro de ${action} todos los usuarios?`,
+      "question"
+    );
+
+    if (confirmResult.isConfirmed) {
+      const nuevosSeleccionados = {};
+      usuariosFiltrados.forEach((usuario) => {
+        nuevosSeleccionados[usuario.rut] = !seleccionarTodos;
+      });
+      setUsuariosSeleccionados((prevSeleccionados) => ({
+        ...prevSeleccionados,
+        ...nuevosSeleccionados,
+      }));
+      setSeleccionarTodos((prevState) => !prevState);
+      await showAlert("Éxito", `Se han ${action}ado todos los usuarios.`, "success");
+    }
   };
 
   const handleAsignar = async () => {
     if (!encuestaId) {
-      alert("Seleccione una encuesta para asignar.");
+      await showAlert("Error", "Seleccione una encuesta para asignar.", "error");
       return;
     }
 
@@ -109,28 +123,49 @@ const AsignarEncuestas = () => {
       .map((usuario) => usuario.rut);
 
     if (usuarioIdsSeleccionados.length === 0) {
-      alert("Seleccione al menos un usuario para asignar la encuesta.");
+      await showAlert("Error", "Seleccione al menos un usuario para asignar la encuesta.", "error");
       return;
     }
 
-    try {
-      const response = await axios.post(
-        "http://localhost:4000/api/encuestasAsignada/asignar",
-        {
-          encuestaId: parseInt(encuestaId),
-          usuarioIds: usuarioIdsSeleccionados,
-          areaId: areaId || null,
-        }
-      );
+    const confirmResult = await showConfirm(
+      "Confirmar asignación",
+      `¿Está seguro de asignar la encuesta a ${usuarioIdsSeleccionados.length} usuario(s)?`,
+      "question"
+    );
 
-      alert(response.data.message || "Encuesta asignada con éxito.");
-    } catch (error) {
-      console.error("Error al asignar encuesta:", error);
-      alert(
-        error.response?.data?.error ||
-          "Error al asignar encuesta. Intente nuevamente."
-      );
+    if (confirmResult.isConfirmed) {
+      try {
+        const response = await axios.post(
+          "http://localhost:4000/api/encuestasAsignada/asignar",
+          {
+            encuestaId: parseInt(encuestaId),
+            usuarioIds: usuarioIdsSeleccionados,
+            areaId: areaId || null,
+          }
+        );
+
+        await showAlert("Éxito", response.data.message || "Encuesta asignada con éxito.", "success");
+      } catch (error) {
+        console.error("Error al asignar encuesta:", error);
+        await showAlert(
+          "Error",
+          error.response?.data?.error || "Error al asignar encuesta. Intente nuevamente.",
+          "error"
+        );
+      }
     }
+  };
+
+  // Paginación de usuarios
+  const usuariosPaginados = usuariosFiltrados.slice(
+    (paginaActual - 1) * usuariosPorPagina,
+    paginaActual * usuariosPorPagina
+  );
+
+  const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
+
+  const cambiarPagina = (nuevaPagina) => {
+    setPaginaActual(nuevaPagina);
   };
 
   return (
@@ -210,7 +245,7 @@ const AsignarEncuestas = () => {
                 {seleccionarTodos ? "Desmarcar Todos" : "Seleccionar Todos"}
               </Button>
               <div className="space-y-2">
-                {usuariosFiltrados.map((usuario) => (
+                {usuariosPaginados.map((usuario) => (
                   <div
                     key={usuario.rut}
                     className="flex items-center space-x-2"
@@ -225,6 +260,23 @@ const AsignarEncuestas = () => {
                     </Label>
                   </div>
                 ))}
+              </div>
+              <div className="flex justify-between mt-4">
+                <Button
+                  disabled={paginaActual === 1}
+                  onClick={() => cambiarPagina(paginaActual - 1)}
+                >
+                  Anterior
+                </Button>
+                <span>
+                  Página {paginaActual} de {totalPaginas}
+                </span>
+                <Button
+                  disabled={paginaActual === totalPaginas}
+                  onClick={() => cambiarPagina(paginaActual + 1)}
+                >
+                  Siguiente
+                </Button>
               </div>
             </div>
           </CardContent>

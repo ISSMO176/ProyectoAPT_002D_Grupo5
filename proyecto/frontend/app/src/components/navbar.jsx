@@ -148,9 +148,6 @@ const Navbar = () => {
           ))}
         </div>
         <div className="navbar-right">
-          <button className="icon-button" aria-label="Notificaciones">
-            <Bell size={20} />
-          </button>
           <Link
             to="/perfil"
             className="icon-button"

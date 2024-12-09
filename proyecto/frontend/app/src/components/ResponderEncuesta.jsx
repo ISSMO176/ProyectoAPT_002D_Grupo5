@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from 'lucide-react'
+import { showAlert } from "../lib/sweetalAlert"
 
 const ResponderEncuesta = () => {
     const { encuestaId } = useParams();
@@ -51,14 +52,14 @@ const ResponderEncuesta = () => {
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert('Respuestas enviadas correctamente');
+            await showAlert('Éxito', 'Respuestas enviadas correctamente', 'success');
             navigate('/misEncuestas');
         } catch (error) {
             if (error.response && error.response.status === 400) {
-                alert(error.response.data.error || 'Error al enviar respuestas');
+                await showAlert('Error', error.response.data.error || 'Error al enviar respuestas', 'error');
             } else {
                 console.error('Error al enviar respuestas:', error);
-                alert('Error al enviar respuestas');
+                await showAlert('Error', 'Error al enviar respuestas', 'error');
             }
         } finally {
             setEnviando(false);
@@ -128,3 +129,4 @@ const ResponderEncuesta = () => {
 };
 
 export default ResponderEncuesta;
+

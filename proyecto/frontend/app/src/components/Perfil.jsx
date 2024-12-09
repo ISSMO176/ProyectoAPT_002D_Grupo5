@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { showAlert } from "../lib/sweetalAlert"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { User, Mail, Briefcase, Building2, Key } from 'lucide-react'
+
 
 const Perfil = () => {
   const [formData, setFormData] = useState({
@@ -64,12 +72,11 @@ const Perfil = () => {
 
     const token = localStorage.getItem('token');
     if (!token) {
-      setError('No estás autenticado. Por favor inicia sesión.');
+      await showAlert('Error', 'No estás autenticado. Por favor inicia sesión.', 'error');
       return;
     }
 
     try {
-      // Excluir los campos bloqueados
       const { rut, rol, area, ...actualizable } = formData;
 
       const response = await axios.put(
@@ -80,92 +87,141 @@ const Perfil = () => {
         }
       );
 
-      setMensaje('Perfil actualizado correctamente.');
-      setFormData({ ...formData, contrasena: '' }); // Limpia la contraseña
+      await showAlert('Éxito', 'Perfil actualizado correctamente.', 'success');
+      setFormData({ ...formData, contrasena: '' });
     } catch (err) {
       console.error('Error al actualizar el perfil:', err.response?.data || err);
-      setError(err.response?.data?.error || 'Error al actualizar el perfil.');
+      await showAlert('Error', err.response?.data?.error || 'Error al actualizar el perfil.', 'error');
     }
   };
 
   return (
-    <div className="container mt-4">
-      <h2>Perfil de Usuario</h2>
-      {mensaje && <div className="alert alert-success">{mensaje}</div>}
-      {error && <div className="alert alert-danger">{error}</div>}
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid md:grid-cols-2 gap-8">
+        <Card className="md:col-span-1">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Perfil de Usuario</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="aspect-square relative overflow-hidden rounded-lg bg-muted">
+              <img
+                src="/Equipo_salfa.png"
+                alt="Equipo Salfa"
+                className="object-cover w-full h-full"
+              />
+            </div>
+            <div className="space-y-4 mt-6">
+              <p className="text-muted-foreground">
+                Gracias por ser parte de nuestro equipo. Tu perfil es importante para nosotros.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="md:col-span-1">
+          <CardContent>
+            {mensaje && (
+              <Alert className="mb-6">
+                <AlertTitle>Éxito</AlertTitle>
+                <AlertDescription>{mensaje}</AlertDescription>
+              </Alert>
+            )}
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-      <form onSubmit={handleActualizarPerfil}>
-        <div className="mb-3">
-          <label className="form-label">RUT</label>
-          <input type="text" className="form-control" value={formData.rut} disabled />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Nombre</label>
-          <input
-            type="text"
-            className="form-control"
-            name="nombre"
-            value={formData.nombre}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Apellido Paterno</label>
-          <input
-            type="text"
-            className="form-control"
-            name="apellido_paterno"
-            value={formData.apellido_paterno}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Apellido Materno</label>
-          <input
-            type="text"
-            className="form-control"
-            name="apellido_materno"
-            value={formData.apellido_materno}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Correo</label>
-          <input
-            type="email"
-            className="form-control"
-            name="correo"
-            value={formData.correo}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Rol</label>
-          <input type="text" className="form-control" value={formData.rol} disabled />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Área</label>
-          <input type="text" className="form-control" value={formData.area} disabled />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Nueva Contraseña</label>
-          <input
-            type="password"
-            className="form-control"
-            name="contrasena"
-            value={formData.contrasena}
-            onChange={handleInputChange}
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">
-          Actualizar Perfil
-        </button>
-      </form>
+              <form onSubmit={handleActualizarPerfil} className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2 mb-4">
+                  <Label htmlFor="rut" className="mt-4" >RUT</Label>
+                  <Input id="rut" value={formData.rut} disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nombre">Nombre</Label>
+                  <Input
+                    id="nombre"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="apellido_paterno">Apellido Paterno</Label>
+                  <Input
+                    id="apellido_paterno"
+                    name="apellido_paterno"
+                    value={formData.apellido_paterno}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="apellido_materno">Apellido Materno</Label>
+                  <Input
+                    id="apellido_materno"
+                    name="apellido_materno"
+                    value={formData.apellido_materno}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="correo">Correo</Label>
+                  <div className="relative">
+                    <Mail className="absolute right-4 top-3 h-4 w-4" />
+                    <Input
+                      id="correo"
+                      name="correo"
+                      type="email"
+                      value={formData.correo}
+                      onChange={handleInputChange}
+                      required
+                      className="pl-8"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="rol">Rol</Label>
+                  <div className="relative">
+                    <Briefcase className="absolute Right-4 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input id="rol" value={formData.rol} disabled className="pl-8" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="area">Área</Label>
+                  <div className="relative">
+                    <Building2 className="absolute Right-4 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input id="area" value={formData.area} disabled className="pl-8" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contrasena">Nueva Contraseña</Label>
+                  <div className="relative">
+                    <Key className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="contrasena"
+                      name="contrasena"
+                      type="password"
+                      value={formData.contrasena}
+                      onChange={handleInputChange}
+                      className="pl-8"
+                    />
+                  </div>
+                </div>
+              </div>
+              <Button type="submit" className="w-full">
+                Actualizar Perfil
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
 
 export default Perfil;
+

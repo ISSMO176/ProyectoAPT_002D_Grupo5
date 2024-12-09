@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Plus, Pencil, Search } from 'lucide-react'
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { showAlert, showConfirm } from "../lib/sweetalAlert";
 
 const Areas = () => {
   const [areas, setAreas] = useState([]);
@@ -37,15 +37,18 @@ const Areas = () => {
           nombre_area: nombreArea,
         });
         setAreas(areas.map((area) => (area.id_area === editingArea.id_area ? response.data : area)));
+        await showAlert('Éxito', 'Área actualizada correctamente', 'success');
       } else {
         const response = await axios.post('http://localhost:4000/api/areas', { nombre_area: nombreArea });
         setAreas([...areas, response.data]);
+        await showAlert('Éxito', 'Área creada correctamente', 'success');
       }
       setNombreArea('');
       setEditingArea(null);
       setIsDialogOpen(false);
     } catch (error) {
       console.error('Error creating/updating area:', error);
+      await showAlert('Error', 'Hubo un problema al crear/actualizar el área', 'error');
     }
   };
 
@@ -138,3 +141,4 @@ const Areas = () => {
 };
 
 export default Areas;
+

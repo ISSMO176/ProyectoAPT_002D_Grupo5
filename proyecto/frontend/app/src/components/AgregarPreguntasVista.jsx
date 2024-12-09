@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { PlusCircle, Pencil, Trash2 } from 'lucide-react'
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { showAlert, showConfirm } from "../lib/sweetalAlert";
 
 const AgregarPreguntasVista = () => {
   const { id } = useParams();
@@ -56,29 +56,35 @@ const AgregarPreguntasVista = () => {
 
     try {
       if (editando) {
-        // Actualizar pregunta existente
         await axios.put(`http://localhost:4000/api/preguntas/${editando}`, nuevaPregunta);
-        setEditando(null);
+        await showAlert('Éxito', 'Pregunta actualizada correctamente', 'success');
       } else {
-        // Crear nueva pregunta
         await axios.post('http://localhost:4000/api/preguntas', nuevaPregunta);
+        await showAlert('Éxito', 'Pregunta agregada correctamente', 'success');
       }
       
       setTextoPregunta('');
       setTipoRespuesta('texto');
       setOpciones([]);
-      fetchEncuesta(); // Recargar preguntas después de agregar o editar una pregunta
+      setEditando(null);
+      fetchEncuesta();
     } catch (error) {
       console.error('Error al agregar o editar la pregunta:', error);
+      await showAlert('Error', 'Hubo un problema al agregar o editar la pregunta', 'error');
     }
   };
 
   const handleEliminarPregunta = async (idPregunta) => {
-    try {
-      await axios.delete(`http://localhost:4000/api/preguntas/${idPregunta}`);
-      fetchEncuesta(); // Recargar preguntas después de eliminar
-    } catch (error) {
-      console.error('Error al eliminar la pregunta:', error);
+    const result = await showConfirm('Confirmar eliminación', '¿Está seguro de que desea eliminar esta pregunta?');
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:4000/api/preguntas/${idPregunta}`);
+        await showAlert('Éxito', 'Pregunta eliminada correctamente', 'success');
+        fetchEncuesta();
+      } catch (error) {
+        console.error('Error al eliminar la pregunta:', error);
+        await showAlert('Error', 'Hubo un problema al eliminar la pregunta', 'error');
+      }
     }
   };
 
@@ -190,3 +196,4 @@ const AgregarPreguntasVista = () => {
 };
 
 export default AgregarPreguntasVista;
+

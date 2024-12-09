@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { showAlert } from "../lib/sweetalAlert";
 
 const MisEncuestas = () => {
     const [encuestas, setEncuestas] = useState([]);
@@ -28,7 +29,7 @@ const MisEncuestas = () => {
                 setError(null);
             } catch (error) {
                 console.error('Error al obtener encuestas:', error);
-                setError('Error al obtener encuestas asignadas. Por favor, intente de nuevo más tarde.');
+                await showAlert('Error', 'Error al obtener encuestas asignadas. Por favor, intente de nuevo más tarde.', 'error');
             } finally {
                 setLoading(false);
             }
@@ -151,3 +152,4 @@ const MisEncuestas = () => {
 };
 
 export default MisEncuestas;
+

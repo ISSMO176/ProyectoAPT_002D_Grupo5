@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { showAlert } from "../lib/sweetalAlert";
 
 const ModificarEncuesta = () => {
   const { idEncuesta } = useParams(); // Obtenemos el ID desde la URL
@@ -37,11 +38,11 @@ const ModificarEncuesta = () => {
       await axios.put(`http://localhost:4000/api/encuestas/${idEncuesta}`, encuesta, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMensaje('Cambios guardados con éxito.');
-      setTimeout(() => navigate('/encuestas'), 2000); // Redirigir después de un tiempo
+      await showAlert('Éxito', 'Cambios guardados con éxito', 'success');
+      setTimeout(() => navigate('/encuestas'), 2000);
     } catch (error) {
       console.error('Error al modificar la encuesta:', error);
-      setError('Error al modificar la encuesta. Intente nuevamente.');
+      await showAlert('Error', 'Error al modificar la encuesta. Intente nuevamente.', 'error');
     }
   };
 
@@ -99,3 +100,4 @@ const ModificarEncuesta = () => {
 };
 
 export default ModificarEncuesta;
+

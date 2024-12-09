@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Check, X } from "lucide-react";
+import { Check, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 
 export default function UsuarioForm({
   usuarioEditado = null,
@@ -85,9 +86,10 @@ export default function UsuarioForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones
+
     if (errorRut || errorCorreo || errorContrasena) {
-      return; // Si hay errores, no enviamos el formulario
+      await showAlert('Error', 'Por favor, corrija los errores en el formulario antes de enviar.', 'error');
+      return;
     }
 
     try {
@@ -102,8 +104,8 @@ export default function UsuarioForm({
         areaId: areaIdArea,
       };
 
-      // Llamada a la API para guardar el usuario
       await onSave(usuario);
+      await showAlert('Éxito', 'Usuario guardado correctamente', 'success');
     } catch (error) {
       const errorResponse = error.response?.data?.error || "Error desconocido";
       if (errorResponse === "RUT inválido") {
@@ -117,7 +119,7 @@ export default function UsuarioForm({
           "El correo electrónico ya está registrado, por favor ingrese otro."
         );
       } else {
-        setErrorCorreo("Ocurrió un error al guardar el usuario.");
+        await showAlert('Error', 'Ocurrió un error al guardar el usuario: ' + errorResponse, 'error');
       }
     }
   };
@@ -271,3 +273,4 @@ export default function UsuarioForm({
     </div>
   );
 }
+

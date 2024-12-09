@@ -58,18 +58,6 @@ const CrearEncuesta = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="estado">Estado</Label>
-              <Select value={estadoEncuesta} onValueChange={setEstadoEncuesta}>
-                <SelectTrigger id="estado">
-                  <SelectValue placeholder="Seleccione el estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Habilitada">Habilitada</SelectItem>
-                  <SelectItem value="Deshabilitada">Deshabilitada</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="fechaCreacion">Fecha de Creación</Label>
               <Input
                 id="fechaCreacion"

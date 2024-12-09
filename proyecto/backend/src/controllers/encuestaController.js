@@ -145,6 +145,18 @@ export const obtenerDetallesEncuesta = async (req, res) => {
             },
           },
         },
+        encuestasAsignadas: {
+          include: {
+            usuario: {
+              select: {
+                rut: true,
+                nombre: true,
+                apellido_paterno: true,
+                apellido_materno: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -152,7 +164,38 @@ export const obtenerDetallesEncuesta = async (req, res) => {
       return res.status(404).json({ error: "Encuesta no encontrada" });
     }
 
-    res.status(200).json(encuesta);
+    const usuarios = encuesta.encuestasAsignadas.map((asignacion) => {
+      const usuario = asignacion.usuario;
+      const haRespondido = encuesta.preguntas.every((pregunta) =>
+        pregunta.respuestas.some(
+          (respuesta) => respuesta.usuario.rut === usuario.rut
+        )
+      );
+
+      return {
+        rut: usuario.rut,
+        nombre: `${usuario.nombre} ${usuario.apellido_paterno} ${usuario.apellido_materno}`,
+        estado: haRespondido ? "Respondida" : "No Respondida",
+      };
+    });
+
+    // Respuesta final procesada
+    const encuestaProcesada = {
+      id_encuesta: encuesta.id_encuesta,
+      titulo: encuesta.titulo,
+      preguntas: encuesta.preguntas.map((pregunta) => ({
+        id_pregunta: pregunta.id_pregunta,
+        texto_pregunta: pregunta.texto_pregunta,
+        respuestas: pregunta.respuestas.map((respuesta) => ({
+          rut_usuario: respuesta.usuario.rut,
+          texto_respuesta: respuesta.texto_respuesta,
+          opcion: respuesta.opcion?.texto_opcion || null,
+        })),
+      })),
+      usuarios,
+    };
+
+    res.status(200).json(encuestaProcesada);
   } catch (error) {
     console.error("Error al obtener detalles de la encuesta:", error);
     res.status(500).json({ error: "Error interno del servidor" });

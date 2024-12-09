@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PlusCircle } from 'lucide-react';
+import { showAlert, showConfirm } from "../lib/sweetalAlert";
 
 const Encuestas = () => {
   const [encuestas, setEncuestas] = useState([]);
@@ -31,16 +32,21 @@ const Encuestas = () => {
   const handleModificarEncuesta = (idEncuesta) => navigate(`/modificar-encuesta/${idEncuesta}`);
   const handleAgregarPreguntas = (idEncuesta) => navigate(`/agregar-preguntas/${idEncuesta}`);
   const handleToggleEncuesta = async (idEncuesta) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.put(
-        `http://localhost:4000/api/encuestas/deshabilitar/${idEncuesta}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchEncuestas(); // Actualizar la lista
-    } catch (error) {
-      console.error('Error al cambiar el estado de la encuesta:', error.message);
+    const result = await showConfirm('Confirmar acción', '¿Está seguro de que desea cambiar el estado de esta encuesta?');
+    if (result.isConfirmed) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.put(
+          `http://localhost:4000/api/encuestas/deshabilitar/${idEncuesta}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        await showAlert('Éxito', 'Estado de la encuesta actualizado correctamente', 'success');
+        fetchEncuestas();
+      } catch (error) {
+        console.error('Error al cambiar el estado de la encuesta:', error.message);
+        await showAlert('Error', 'Hubo un problema al cambiar el estado de la encuesta', 'error');
+      }
     }
   };
 
@@ -125,3 +131,4 @@ const Encuestas = () => {
 };
 
 export default Encuestas;
+

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Plus, Pencil, Search } from "lucide-react";
+import { Plus, Pencil, Search } from 'lucide-react';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { showAlert, showConfirm } from "../lib/sweetalAlert"
 
 const Roles = () => {
   const [roles, setRoles] = useState([]);
@@ -65,21 +66,20 @@ const Roles = () => {
             rol.id_rol === editingRol.id_rol ? response.data : rol
           )
         );
+        await showAlert('Éxito', 'Rol actualizado con éxito!', 'success');
       } else {
         const response = await axios.post("http://localhost:4000/api/roles", {
           nombre_rol: nombreRol,
         });
         setRoles([...roles, response.data]);
+        await showAlert('Éxito', 'Rol creado con éxito!', 'success');
       }
       setNombreRol("");
       setEditingRol(null);
       setIsDialogOpen(false);
-      setSuccessMessage(
-        editingRol ? "Rol actualizado con éxito!" : "Rol creado con éxito!"
-      );
     } catch (error) {
       console.error("Error creating/updating role:", error);
-      setError("Error al crear/actualizar el rol");
+      await showAlert('Error', 'Error al crear/actualizar el rol', 'error');
     }
   };
 
@@ -191,3 +191,4 @@ const Roles = () => {
 };
 
 export default Roles;
+

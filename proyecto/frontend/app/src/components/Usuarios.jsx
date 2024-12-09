@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Plus, Pencil, ToggleLeft, Upload } from "lucide-react";
+import { Plus, Pencil, Upload } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,11 @@ const Usuarios = () => {
   const [usuarioDeshabilitar, setUsuarioDeshabilitar] = useState(null);
   const [mostrarDialogo, setMostrarDialogo] = useState(false);
 
+  // Estados para paginación y búsqueda
+  const [paginaActual, setPaginaActual] = useState(1);
+  const usuariosPorPagina = 10;
+  const [busquedaRut, setBusquedaRut] = useState("");
+
   useEffect(() => {
     obtenerUsuarios();
     obtenerRoles();
@@ -69,6 +74,27 @@ const Usuarios = () => {
       setAreas(response.data);
     } catch (error) {
       console.error("Error al obtener áreas", error);
+    }
+  };
+
+  // Filtrar usuarios por RUT
+  const usuariosFiltrados = usuarios.filter((usuario) =>
+    usuario.rut.toLowerCase().includes(busquedaRut.toLowerCase())
+  );
+
+  // Cálculo para paginación
+  const indiceUltimoUsuario = paginaActual * usuariosPorPagina;
+  const indicePrimerUsuario = indiceUltimoUsuario - usuariosPorPagina;
+  const usuariosPaginados = usuariosFiltrados.slice(
+    indicePrimerUsuario,
+    indiceUltimoUsuario
+  );
+
+  const totalPaginas = Math.ceil(usuariosFiltrados.length / usuariosPorPagina);
+
+  const cambiarPagina = (nuevaPagina) => {
+    if (nuevaPagina > 0 && nuevaPagina <= totalPaginas) {
+      setPaginaActual(nuevaPagina);
     }
   };
 
@@ -114,7 +140,7 @@ const Usuarios = () => {
         }`
       );
     }
-  };
+  }
 
   const handleCambiarEstadoUsuario = async () => {
     if (!usuarioDeshabilitar) return;
@@ -209,6 +235,12 @@ const Usuarios = () => {
             </Dialog>
             <div className="flex items-center space-x-2">
               <Input
+                type="text"
+                placeholder="Buscar por RUT"
+                value={busquedaRut}
+                onChange={(e) => setBusquedaRut(e.target.value)}
+              />
+              <Input
                 type="file"
                 accept=".xlsx, .xls"
                 onChange={handleArchivoExcelChange}
@@ -230,7 +262,7 @@ const Usuarios = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {usuarios.map((usuario) => {
+              {usuariosPaginados.map((usuario) => {
                 const rol = roles.find((r) => r.id_rol === usuario.rolId);
                 const area = areas.find((a) => a.id_area === usuario.areaId);
                 return (
@@ -268,6 +300,26 @@ const Usuarios = () => {
               })}
             </TableBody>
           </Table>
+          {/* Controles de paginación */}
+          <div className="flex justify-center items-center mt-4">
+            <Button
+              variant="outline"
+              onClick={() => cambiarPagina(paginaActual - 1)}
+              disabled={paginaActual === 1}
+            >
+              Anterior
+            </Button>
+            <span className="mx-4">
+              Página {paginaActual} de {totalPaginas}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => cambiarPagina(paginaActual + 1)}
+              disabled={paginaActual === totalPaginas}
+            >
+              Siguiente
+            </Button>
+          </div>
         </CardContent>
       </Card>
       {usuarioDeshabilitar && (
@@ -304,4 +356,5 @@ const Usuarios = () => {
     </div>
   );
 };
+
 export default Usuarios;
