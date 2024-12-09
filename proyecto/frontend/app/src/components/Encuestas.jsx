@@ -62,7 +62,7 @@ const Encuestas = () => {
     if (currentPage < Math.ceil(encuestas.length / encuestasPerPage)) {
       setCurrentPage(currentPage + 1);
     }
-  };
+  };  
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {

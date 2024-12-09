@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, BarChart2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, BarChart2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Input } from "@/components/ui/input";
 
 const Dashboard = () => {
   const [encuestas, setEncuestas] = useState([]);
@@ -33,6 +34,7 @@ const Dashboard = () => {
   const [respuestasPorPagina] = useState(5); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [rutFilter, setRutFilter] = useState('');
   const navigate = useNavigate(); 
 
   useEffect(() => {
@@ -122,21 +124,24 @@ const Dashboard = () => {
 
   const indexOfLastUsuario = currentPage * usuariosPorPagina;
   const indexOfFirstUsuario = indexOfLastUsuario - usuariosPorPagina;
-  const currentUsuarios = detallesEncuesta
-    ? detallesEncuesta.usuarios.slice(indexOfFirstUsuario, indexOfLastUsuario)
-    : [];
-
-  const paginateUsuarios = (pageNumber) => setCurrentPage(pageNumber);
-
-  // Lógica de paginación para respuestas
   const indexOfLastRespuesta = respuestasPage * respuestasPorPagina;
   const indexOfFirstRespuesta = indexOfLastRespuesta - respuestasPorPagina;
+
+  const paginateUsuarios = (pageNumber) => setCurrentPage(pageNumber);
+  const paginateRespuestas = (pageNumber) => setRespuestasPage(pageNumber);
+
+  const filteredUsuarios = detallesEncuesta
+    ? detallesEncuesta.usuarios.filter(usuario => 
+      usuario.rut.toLowerCase().includes(rutFilter.toLowerCase())
+    )
+  : [];
+
+  const currentUsuarios = filteredUsuarios.slice(indexOfFirstUsuario, indexOfLastUsuario);
   const currentRespuestas = detallesUsuario?.respuestas.slice(
     indexOfFirstRespuesta,
     indexOfLastRespuesta
   );
 
-  const paginateRespuestas = (pageNumber) => setRespuestasPage(pageNumber);
 
   if (loading) {
     return (
@@ -159,14 +164,14 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold text-center mb-8">Dashboard de Encuestas</h2>
-      <Card>
-        <CardHeader>
-          <CardTitle>Selecciona una Encuesta</CardTitle>
+      <Card className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <CardHeader className="bg-primary text-white p-4">
+          <CardTitle className="text-xl">Selecciona una Encuesta</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <select
             onChange={(e) => handleEncuestaSelect(e.target.value)}
-            className="w-full border rounded px-4 py-2"
+            className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="">Seleccione una encuesta</option>
             {encuestas.map((encuesta) => (
@@ -179,16 +184,26 @@ const Dashboard = () => {
       </Card>
 
       {detallesEncuesta && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>{detallesEncuesta.titulo}</CardTitle>
-            <CardDescription>
+        <Card className="mt-8 bg-white shadow-lg rounded-lg overflow-hidden">
+          <CardHeader className="bg-primary text-white p-4">
+            <CardTitle className="text-xl">{detallesEncuesta.titulo}</CardTitle>
+            <CardDescription className="text-gray-200">
               Detalles y estadísticas de la encuesta seleccionada
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex justify-end mb-4">
-              <Button onClick={handleVerEstadisticas}>
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <div className="relative w-64">
+                <Input
+                  type="text"
+                  placeholder="Buscar por RUT..."
+                  value={rutFilter}
+                  onChange={(e) => setRutFilter(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+              <Button onClick={handleVerEstadisticas} className="bg-primary hover:bg-primary-dark">
                 <BarChart2 className="mr-2 h-4 w-4" />
                 Ver Estadísticas
               </Button>
@@ -196,30 +211,35 @@ const Dashboard = () => {
             <div className="mb-6">
               <Progress
                 value={calcularPorcentajeRespondidas()}
-                className="w-full"
+                className="w-full h-4 rounded-full bg-gray-200"
               />
-              <p className="mt-2">
-                {totalRespondidas} de {totalAsignadas} respondidas (
-                {calcularPorcentajeRespondidas()}%)
+              <p className="mt-2 text-sm text-gray-600">
+                {totalRespondidas} de {totalAsignadas} respondidas ({calcularPorcentajeRespondidas()}%)
               </p>
             </div>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>RUT</TableHead>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Acciones</TableHead>
+                  <TableHead className="font-bold">RUT</TableHead>
+                  <TableHead className="font-bold">Nombre</TableHead>
+                  <TableHead className="font-bold">Estado</TableHead>
+                  <TableHead className="font-bold">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentUsuarios.map((usuario) => (
-                  <TableRow key={usuario.rut}>
+                  <TableRow key={usuario.rut} className="hover:bg-gray-50">
                     <TableCell>{usuario.rut}</TableCell>
                     <TableCell>{usuario.nombre}</TableCell>
-                    <TableCell>{usuario.estado}</TableCell>
                     <TableCell>
-                      <Button onClick={() => handleVerDetallesUsuario(usuario)}>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        usuario.estado === 'Respondida' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {usuario.estado}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Button onClick={() => handleVerDetallesUsuario(usuario)} variant="outline" size="sm">
                         Ver Detalles
                       </Button>
                     </TableCell>
@@ -231,24 +251,57 @@ const Dashboard = () => {
         </Card>
       )}
 
+      {filteredUsuarios.length > usuariosPorPagina && (
+        <div className="flex justify-center mt-4">
+          <Button
+            variant="outline"
+            onClick={() => paginateUsuarios(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="mr-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          {Array.from({ length: Math.ceil(filteredUsuarios.length / usuariosPorPagina) }, (_, i) => (
+            <Button
+              key={i}
+              variant={currentPage === i + 1 ? "default" : "outline"}
+              onClick={() => paginateUsuarios(i + 1)}
+              className="mx-1"
+            >
+              {i + 1}
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            onClick={() => paginateUsuarios(currentPage + 1)}
+            disabled={currentPage === Math.ceil(filteredUsuarios.length / usuariosPorPagina)}
+            className="ml-2"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
       {detallesUsuario && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Detalles de Respuestas</CardTitle>
-            <CardDescription>Usuario: {detallesUsuario.usuario.nombre}</CardDescription>
+        <Card className="mt-8 bg-white shadow-lg rounded-lg overflow-hidden">
+          <CardHeader className="bg-tertiary text-white p-4">
+            <CardTitle className="text-xl">Detalles de Respuestas</CardTitle>
+            <CardDescription className="text-gray-200">
+              Usuario: {detallesUsuario.usuario.nombre} (RUT: {detallesUsuario.usuario.rut})
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Pregunta</TableHead>
-                  <TableHead>Respuesta</TableHead>
+                  <TableHead className="font-bold">Pregunta</TableHead>
+                  <TableHead className="font-bold">Respuesta</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentRespuestas.map((detalle, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{detalle.pregunta}</TableCell>
+                  <TableRow key={index} className="hover:bg-gray-50">
+                    <TableCell className="font-medium">{detalle.pregunta}</TableCell>
                     <TableCell>{detalle.respuesta}</TableCell>
                   </TableRow>
                 ))}
@@ -260,6 +313,7 @@ const Dashboard = () => {
                 variant="outline"
                 onClick={() => paginateRespuestas(respuestasPage - 1)}
                 disabled={respuestasPage === 1}
+                className="mr-2"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -272,6 +326,7 @@ const Dashboard = () => {
                   key={i}
                   variant={respuestasPage === i + 1 ? "default" : "outline"}
                   onClick={() => paginateRespuestas(i + 1)}
+                  className="mx-1"
                 >
                   {i + 1}
                 </Button>
@@ -283,12 +338,13 @@ const Dashboard = () => {
                   respuestasPage ===
                   Math.ceil(detallesUsuario.respuestas.length / respuestasPorPagina)
                 }
+                className="ml-2"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-            <div className="mt-4">
-              <Button onClick={closeDetallesUsuario}>Cerrar</Button>
+            <div className="mt-4 flex justify-center">
+              <Button onClick={closeDetallesUsuario} variant="secondary">Cerrar</Button>
             </div>
           </CardContent>
         </Card>

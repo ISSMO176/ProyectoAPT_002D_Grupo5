@@ -116,13 +116,13 @@ const Roles = () => {
 
           <div className="flex justify-between items-center mb-6">
             <div className="relative w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar roles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8"
               />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>

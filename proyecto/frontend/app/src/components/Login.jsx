@@ -37,7 +37,7 @@ const Login = () => {
         try {
             const response = await axios.post('http://localhost:4000/api/usuarios/login', { rut, contrasena });
             localStorage.setItem('token', response.data.token);
-            navigate('/misEncuestas');
+            navigate('/Home');
         } catch (error) {
             const mensajeError = error.response?.data?.error || 'Credenciales incorrectas';
             setError(mensajeError);

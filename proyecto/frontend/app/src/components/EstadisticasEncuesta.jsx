@@ -8,19 +8,16 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const EstadisticasEncuesta = () => {
-    const { encuestaId } = useParams(); // Obtener ID de la encuesta desde la URL
-    const { state } = useLocation(); // Obtener datos pasados al navegar
-    const [tituloEncuesta, setTituloEncuesta] = useState(state?.titulo || "Encuesta"); // Estado para el título
+    const { encuestaId } = useParams();
+    const { state } = useLocation();
+    const [tituloEncuesta, setTituloEncuesta] = useState(state?.titulo || "Encuesta");
     const [fechaCreacion, setFechaCreacion] = useState(
-        state?.fechaCreacion ? new Date(state.fechaCreacion).toLocaleDateString() : "Fecha no disponible"
-    ); // Estado para la fecha de creación
+        state?.fechaCreacion ? new Date(state.fechaCreacion).toLocaleDateString() : "Fecha no disponible");
     const [estadisticas, setEstadisticas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isPieChart, setIsPieChart] = useState(true);
 
     const chartRefs = useRef([]);
-
-    // Cargar detalles de la encuesta si no se pasaron por navegación
     useEffect(() => {
         if (!state?.titulo || !state?.fechaCreacion) {
             const fetchEncuestaDetalles = async () => {
@@ -83,12 +80,11 @@ const EstadisticasEncuesta = () => {
         const doc = new jsPDF();
         const pageHeight = doc.internal.pageSize.height;
         const pageWidth = doc.internal.pageSize.width;
-        const logoWidth = 50;
+        const logoWidth = 60;
         const logoHeight = 10;
         let yOffset = 20;
     
         const logoPath = `${window.location.origin}/logo_salfa.jpg`;
-        const bgPath = `${window.location.origin}/bg_salfacorp.jpg`;
     
         try {
             const imgLogo = await fetch(logoPath)
@@ -101,34 +97,18 @@ const EstadisticasEncuesta = () => {
                     });
                 });
     
-            const imgBg = await fetch(bgPath)
-                .then((res) => res.blob())
-                .then((blob) => {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    });
-                });
-    
-            doc.addImage(imgBg, 'JPEG', 0, 0, pageWidth, pageHeight); // Fondo de la portada
-            doc.addImage(imgLogo, 'JPEG', pageWidth / 2 - logoWidth / 2, 30, logoWidth, logoHeight); // Logo centrado
+            doc.addImage(imgLogo, 'JPEG', pageWidth / 2 - logoWidth / 2, 30, logoWidth, logoHeight);
     
             const titleY = pageHeight / 2 - 20;
             doc.setFontSize(40);
-            doc.setTextColor(255, 255, 255); // Texto blanco
-            doc.text(tituloEncuesta, pageWidth / 2, titleY, { align: "center" }); // Texto con fondo blanco
+            doc.setTextColor(255, 255, 255);
+            doc.text(tituloEncuesta, pageWidth / 2, titleY, { align: "center" });
             doc.setTextColor(0, 0, 0);
-            doc.text(tituloEncuesta, pageWidth / 2, titleY + 0.5, { align: "center" }); // Sombra leve
+            doc.text(tituloEncuesta, pageWidth / 2, titleY + 0.5, { align: "center" });
+            doc.setFontSize(14); 
+            doc.text("Reporte generado automáticamente", pageWidth / 2, pageHeight - 30, { align: "center" });
     
-            doc.setFontSize(12);
-            doc.text(`Fecha de creación: ${fechaCreacion}`, pageWidth / 2, pageHeight - 30, { align: "center" });
-    
-            // Nueva página para gráficos
             doc.addPage();
-            doc.addImage(imgBg, 'JPEG', 0, 0, pageWidth, pageHeight); // Fondo para las páginas siguientes
-    
-            // ** Generación de gráficos **
             for (let index = 0; index < estadisticas.length; index++) {
                 const pregunta = estadisticas[index];
                 const chartRef = chartRefs.current[index];
@@ -137,31 +117,35 @@ const EstadisticasEncuesta = () => {
                     const imgData = await generateChartImage(chartRef);
     
                     doc.setFontSize(21);
-                    doc.text(pregunta.texto_pregunta, 30, yOffset); // Título de la pregunta
+                    doc.text(pregunta.texto_pregunta, 30, yOffset);
                     const chartHeight = 100;
-                    const spacing = 30;
+                    const spacing = 20;
                     doc.addImage(imgData, 'PNG', 10, yOffset + 5, 190, chartHeight);
     
                     yOffset += chartHeight + spacing;
                     if (yOffset > pageHeight - 30) {
                         doc.addPage();
-                        doc.addImage(imgBg, 'JPEG', 0, 0, pageWidth, pageHeight);
                         yOffset = 20;
                     }
                 } catch (error) {
                     console.error("Error al generar la imagen del gráfico:", error);
                 }
             }
-            doc.addPage();
-            doc.addImage(imgBg, 'JPEG', 0, 0, pageWidth, pageHeight);
+    
+            const columnWidth = 10;
+            const columnColor = [189, 44, 13];
+            doc.setFillColor(...columnColor);
+    
+            doc.rect(0, 0, columnWidth, pageHeight, 'F');
+            doc.rect(pageWidth - columnWidth, 0, columnWidth, pageHeight, 'F');
             doc.setFontSize(12);
-            doc.text("Reporte generado automáticamente", pageWidth / 2, pageHeight - 30, { align: "center" });
     
             doc.save(`reporte_estadisticas_${tituloEncuesta}.pdf`);
         } catch (error) {
             console.error("Error al generar el PDF:", error);
         }
     };
+    
     
 
     if (loading) {
